@@ -17,7 +17,5 @@ local.properties
 # Custom
 my-release-key.jks
 /.idea
-gradlew
-gradlew.bat
 /app/pronote-rs/.cargo
 /app/pronote-rs/target
