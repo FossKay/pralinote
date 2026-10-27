@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+
+unset RUSTFLAGS
+
+rustup target add aarch64-linux-android
+
+rm -rf ../src/main/jniLibs/arm64-v8a
+mkdir -p ../src/main/jniLibs/arm64-v8a
+
+# arm64-v8a: smartphones 2015- ig
+cargo ndk \
+    -t arm64-v8a \
+    -o ../src/main/jniLibs \
+    build --release
+
+cargo run --release --bin uniffi-bindgen -- generate \
+    --library target/aarch64-linux-android/release/libpronote_rs.so \
+    --language kotlin \
+    --out-dir ../src/main/java

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -e
+
+# I have export RUSTFLAGS='-C target-cpu=native'
+unset RUSTFLAGS
+
+rustup target add aarch64-linux-android x86_64-linux-android
+
+# Remove previous generated .so
+rm -rf ../src/main/jniLibs
+mkdir -p ../src/main/jniLibs
+
+# Build x86_64 and arm .so
+cargo ndk \
+    -t arm64-v8a \
+    -t x86_64 \
+    -o ../src/main/jniLibs \
+    build --release
+
+# Generated kt code is architecture-independent
+cargo run --release --bin uniffi-bindgen -- generate \
+    --library target/aarch64-linux-android/release/libpronote_rs.so \
+    --language kotlin \
+    --out-dir ../src/main/java
