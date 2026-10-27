@@ -3,6 +3,7 @@ set -e
 
 unset RUSTFLAGS
 
+cargo install cargo-ndk
 rustup target add x86_64-linux-android
 
 rm -rf ../src/main/jniLibs/x86_64

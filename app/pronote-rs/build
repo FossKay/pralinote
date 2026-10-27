@@ -4,6 +4,7 @@ set -e
 # I have export RUSTFLAGS='-C target-cpu=native'
 unset RUSTFLAGS
 
+cargo install cargo-ndk
 rustup target add aarch64-linux-android x86_64-linux-android
 
 # Remove previous generated .so
