@@ -157,34 +157,34 @@ fun Class(lesson: Lesson, showEnd: Boolean) {
                                 style = MaterialTheme.typography.bodyMedium,
                             )
                             Text(
-                                listOf(
+                                (listOf(
                                     lesson.content.teachers.joinToString(", ") {
-                                        it.split(" ").first()
+                                        formatTeacher(it)
                                     },
                                     lesson.content.group.orEmpty(),
                                     lesson.content.classroom.joinToString(", ") { it.name }
                                 )
                                     .filter { it.isNotBlank() }
-                                    .joinToString(", "),
+                                    .joinToString(", ") + "\n" + lesson.note).trim(),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
-                            if (lesson.note.isNotEmpty()) {
+                            /*if (lesson.note.isNotEmpty()) {
                                 Spacer(modifier = Modifier.padding(top = 4.dp))
-                                Box(
+                                /*Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(6.dp))
                                         .background(MaterialTheme.colorScheme.surfaceContainer)
-                                ) {
+                                ) {*/
                                     Text(
-                                        modifier = Modifier.padding(
+                                        /*modifier = Modifier.padding(
                                             horizontal = 8.dp,
                                             vertical = 4.dp,
-                                        ),
+                                        ),*/
                                         text = lesson.note,
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
-                                }
-                            }
+                                //}
+                            }*/
                             if (lesson.status.isNotEmpty()) {
                                 Spacer(modifier = Modifier.padding(top = 4.dp))
                                 Box(
@@ -434,7 +434,10 @@ fun DatePicker(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(onClick = onPrevious) {
+        IconButton(
+            enabled = date != getDate(AppClient.params!!.firstDay),
+            onClick = onPrevious
+        ) {
             Icon(
                 Icons.Outlined.ChevronLeft,
                 contentDescription = "Date précédente",
@@ -444,7 +447,10 @@ fun DatePicker(
             text = prettyDate(date),
             style = MaterialTheme.typography.bodyMedium,
         )
-        IconButton(onClick = onNext) {
+        IconButton(
+            enabled = date != getDate(AppClient.params!!.lastDay),
+            onClick = onNext
+        ) {
             Icon(
                 Icons.Outlined.ChevronRight,
                 contentDescription = "Prochaine date",

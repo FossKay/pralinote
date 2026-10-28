@@ -41,6 +41,10 @@ import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+fun formatTeacher(it: String): String {
+    return it.split(" ").dropLast(1).joinToString(" ")
+}
+
 fun formatSubject(subject: String): String {
     val ignored = setOf("LV1", "LV2", "LP", "LM")
 
