@@ -11,6 +11,7 @@ data class Credentials(
     val rootUrl: String,
     val username: String,
     val password: String,
+    val navIdentifier: String?,
     val schoolName: String,
     val studentName: String,
     val color: String?,
@@ -30,6 +31,7 @@ class CredentialsStore(context: Context) :
                 root_url TEXT NOT NULL,
                 username TEXT NOT NULL,
                 password TEXT NOT NULL,
+                nav_identifier TEXT,
                 school_name TEXT NOT NULL,
                 student_name TEXT NOT NULL,
                 color TEXT,
@@ -66,6 +68,7 @@ class CredentialsStore(context: Context) :
                             rootUrl = cursor.getString(cursor.getColumnIndexOrThrow("root_url")),
                             username = cursor.getString(cursor.getColumnIndexOrThrow("username")),
                             password = cursor.getString(cursor.getColumnIndexOrThrow("password")),
+                            navIdentifier = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("nav_identifier")),
                             schoolName = cursor.getString(cursor.getColumnIndexOrThrow("school_name")),
                             studentName = cursor.getString(cursor.getColumnIndexOrThrow("student_name")),
                             color = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("color")),
@@ -96,6 +99,7 @@ class CredentialsStore(context: Context) :
                 rootUrl = cursor.getString(cursor.getColumnIndexOrThrow("root_url")),
                 username = cursor.getString(cursor.getColumnIndexOrThrow("username")),
                 password = cursor.getString(cursor.getColumnIndexOrThrow("password")),
+                navIdentifier = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("nav_identifier")),
                 schoolName = cursor.getString(cursor.getColumnIndexOrThrow("school_name")),
                 studentName = cursor.getString(cursor.getColumnIndexOrThrow("student_name")),
                 color = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("color")),
@@ -113,6 +117,7 @@ class CredentialsStore(context: Context) :
             put("root_url", credentials.rootUrl)
             put("username", credentials.username)
             put("password", credentials.password)
+            put("nav_identifier", credentials.navIdentifier)
             put("school_name", credentials.schoolName)
             put("student_name", credentials.studentName)
             put("color", credentials.color)
@@ -142,10 +147,6 @@ class CredentialsStore(context: Context) :
             "id = ?",
             arrayOf(id.toString())
         )
-    }
-
-    fun clear() {
-        writableDatabase.delete("credentials", null, null)
     }
 
     private fun Boolean.toInt(): Int = if (this) 1 else 0
