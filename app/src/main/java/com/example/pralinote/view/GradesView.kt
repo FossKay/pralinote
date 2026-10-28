@@ -64,7 +64,7 @@ fun GradesView(
     var selected by remember { mutableStateOf<Period?>(null) }
 
     LaunchedEffect(Unit) {
-        periods = AppClient.instance!!.userParams()!!.resource.periods
+        periods = AppClient.instance!!.userParams()!!.student.periods
         if (!homeState.isLoading && homeState.home == null && homeState.error == null) {
             homeViewModel.loadHome()
         }
@@ -229,7 +229,7 @@ fun GradesList(grades: List<Grade>, footer: @Composable () -> Unit = {}) {
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                formatSubject(grade.subject.name),
+                                formatSubject(grade.subject.subject.name),
                                 fontWeight = FontWeight.Bold,
                                 style = MaterialTheme.typography.bodyMedium,
                             )

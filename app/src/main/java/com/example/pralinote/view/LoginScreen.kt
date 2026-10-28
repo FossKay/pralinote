@@ -155,7 +155,7 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
                             username = username,
                             password = password,
                             schoolName = client.params().schoolName,
-                            studentName = client.userParams()!!.resource.name,
+                            studentName = client.userParams()!!.student.person.name,
                             color = client.params().collectivity.color,
                             isToken = false,
                             dirty = false,
@@ -170,7 +170,7 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
                                 username = username,
                                 password = password,
                                 schoolName = client.params().schoolName,
-                                studentName = client.userParams()!!.resource.name,
+                                studentName = client.userParams()!!.student.person.name,
                                 color = client.params().collectivity.color,
                                 isToken = false,
                                 dirty = false
