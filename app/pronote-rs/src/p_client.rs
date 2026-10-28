@@ -186,8 +186,8 @@ impl PronoteClient {
             .await
     }
 
-    pub async fn get_attachment(&self, attachment: Attachment) -> String {
-        self.c.lock().await.get_attachment(&attachment)
+    pub async fn staff(&self) -> Result<Vec<StaffTeacher>, Error> {
+        self.c.lock().await.staff().await
     }
 
     pub async fn geolocation(
@@ -224,7 +224,11 @@ impl PronoteClient {
         Client::mock_grades(&period).await
     }
 
-    pub async fn mock_documents(&self) -> Result<Resources, Error> {
+    pub async fn mock_documents(
+        &self,
+        _first_week: u8,
+        _last_week: u8,
+    ) -> Result<Resources, Error> {
         Client::mock_documents().await
     }
 
@@ -240,12 +244,31 @@ impl PronoteClient {
         Client::mock_discussions().await
     }
 
-    pub async fn mock_messages(&self) -> Result<Messages, Error> {
+    pub async fn mock_messages(
+        &self,
+        _possessions: Vec<Possession>,
+    ) -> Result<Messages, Error> {
         Client::mock_messages().await
     }
 
-    pub async fn mock_news_item_content(&self) -> Result<Vec<Question>, Error> {
+    pub async fn mock_news_item_content(
+        &self,
+        _news_item_id: String,
+    ) -> Result<Vec<Question>, Error> {
         Client::mock_news_item_content().await
+    }
+
+    pub async fn mock_set_done(
+        &self,
+        _homework_id: String,
+        _done: bool,
+    ) -> Result<(), Error> {
+        // do nothing
+        Ok(())
+    }
+
+    pub async fn mock_staff(&self) -> Result<Vec<StaffTeacher>, Error> {
+        Client::mock_staff().await
     }
 
     pub async fn mock_geolocation(&self) -> Result<Vec<School>, Error> {

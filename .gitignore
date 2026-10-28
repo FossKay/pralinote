@@ -19,3 +19,4 @@ my-release-key.jks
 /.idea
 /app/pronote-rs/.cargo
 /app/pronote-rs/target
+/app/src/main/jniLibs

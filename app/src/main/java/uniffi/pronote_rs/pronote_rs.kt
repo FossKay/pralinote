@@ -653,8 +653,6 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_pronote_rs_checksum_method_pronoteclient_geolocation(
     ): Int
-    external fun uniffi_pronote_rs_checksum_method_pronoteclient_get_attachment(
-    ): Int
     external fun uniffi_pronote_rs_checksum_method_pronoteclient_get_week(
     ): Int
     external fun uniffi_pronote_rs_checksum_method_pronoteclient_grades(
@@ -685,6 +683,10 @@ internal object IntegrityCheckingUniffiLib {
     ): Int
     external fun uniffi_pronote_rs_checksum_method_pronoteclient_mock_news_item_content(
     ): Int
+    external fun uniffi_pronote_rs_checksum_method_pronoteclient_mock_set_done(
+    ): Int
+    external fun uniffi_pronote_rs_checksum_method_pronoteclient_mock_staff(
+    ): Int
     external fun uniffi_pronote_rs_checksum_method_pronoteclient_mock_timetable(
     ): Int
     external fun uniffi_pronote_rs_checksum_method_pronoteclient_nav_identifier(
@@ -698,6 +700,8 @@ internal object IntegrityCheckingUniffiLib {
     external fun uniffi_pronote_rs_checksum_method_pronoteclient_params(
     ): Int
     external fun uniffi_pronote_rs_checksum_method_pronoteclient_set_done(
+    ): Int
+    external fun uniffi_pronote_rs_checksum_method_pronoteclient_staff(
     ): Int
     external fun uniffi_pronote_rs_checksum_method_pronoteclient_timetable(
     ): Int
@@ -751,8 +755,6 @@ internal object UniffiLib {
     ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_geolocation(`ptr`: Long,`lat`: Double,`long`: Double,
     ): Long
-    external fun uniffi_pronote_rs_fn_method_pronoteclient_get_attachment(`ptr`: Long,`attachment`: RustBuffer.ByValue,
-    ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_get_week(`ptr`: Long,`date`: RustBuffer.ByValue,
     ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_grades(`ptr`: Long,`period`: RustBuffer.ByValue,
@@ -767,7 +769,7 @@ internal object UniffiLib {
     ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_discussions(`ptr`: Long,
     ): Long
-    external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_documents(`ptr`: Long,
+    external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_documents(`ptr`: Long,`firstWeek`: Byte,`lastWeek`: Byte,
     ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_geolocation(`ptr`: Long,
     ): Long
@@ -777,11 +779,15 @@ internal object UniffiLib {
     ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_homework(`ptr`: Long,`firstWeek`: Byte,`lastWeek`: Byte,
     ): Long
-    external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_messages(`ptr`: Long,
+    external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_messages(`ptr`: Long,`possessions`: RustBuffer.ByValue,
     ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_news(`ptr`: Long,
     ): Long
-    external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_news_item_content(`ptr`: Long,
+    external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_news_item_content(`ptr`: Long,`newsItemId`: RustBuffer.ByValue,
+    ): Long
+    external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_set_done(`ptr`: Long,`homeworkId`: RustBuffer.ByValue,`done`: Byte,
+    ): Long
+    external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_staff(`ptr`: Long,
     ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_mock_timetable(`ptr`: Long,`week`: Byte,
     ): Long
@@ -796,6 +802,8 @@ internal object UniffiLib {
     external fun uniffi_pronote_rs_fn_method_pronoteclient_params(`ptr`: Long,
     ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_set_done(`ptr`: Long,`homeworkId`: RustBuffer.ByValue,`done`: Byte,
+    ): Long
+    external fun uniffi_pronote_rs_fn_method_pronoteclient_staff(`ptr`: Long,
     ): Long
     external fun uniffi_pronote_rs_fn_method_pronoteclient_timetable(`ptr`: Long,`week`: Byte,
     ): Long
@@ -934,9 +942,6 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_geolocation() != 38481) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_get_attachment() != 19782) {
-        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
-    }
     if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_get_week() != 58166) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
@@ -958,7 +963,7 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_discussions() != 35283) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_documents() != 57507) {
+    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_documents() != 24977) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_geolocation() != 63514) {
@@ -973,13 +978,19 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
     if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_homework() != 30918) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_messages() != 35491) {
+    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_messages() != 40197) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_news() != 40215) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
-    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_news_item_content() != 51240) {
+    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_news_item_content() != 62455) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_set_done() != 57211) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_staff() != 6509) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_mock_timetable() != 37439) {
@@ -1001,6 +1012,9 @@ private fun uniffiCheckApiChecksums(lib: IntegrityCheckingUniffiLib) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_set_done() != 28601) {
+        throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
+    }
+    if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_staff() != 50333) {
         throw RuntimeException("UniFFI API checksum mismatch: try cleaning and rebuilding your project")
     }
     if (lib.uniffi_pronote_rs_checksum_method_pronoteclient_timetable() != 58331) {
@@ -1549,8 +1563,6 @@ public interface PronoteClientInterface {
     
     suspend fun `geolocation`(`lat`: kotlin.Double, `long`: kotlin.Double): List<School>
     
-    suspend fun `getAttachment`(`attachment`: Attachment): kotlin.String
-    
     suspend fun `getWeek`(`date`: kotlin.String): kotlin.UByte
     
     suspend fun `grades`(`period`: Period): Grades
@@ -1565,7 +1577,7 @@ public interface PronoteClientInterface {
     
     suspend fun `mockDiscussions`(): Discussions
     
-    suspend fun `mockDocuments`(): Resources
+    suspend fun `mockDocuments`(`firstWeek`: kotlin.UByte, `lastWeek`: kotlin.UByte): Resources
     
     suspend fun `mockGeolocation`(): List<School>
     
@@ -1575,11 +1587,15 @@ public interface PronoteClientInterface {
     
     suspend fun `mockHomework`(`firstWeek`: kotlin.UByte, `lastWeek`: kotlin.UByte): List<Homework>
     
-    suspend fun `mockMessages`(): Messages
+    suspend fun `mockMessages`(`possessions`: List<Possession>): Messages
     
     suspend fun `mockNews`(): News
     
-    suspend fun `mockNewsItemContent`(): List<Question>
+    suspend fun `mockNewsItemContent`(`newsItemId`: kotlin.String): List<Question>
+    
+    suspend fun `mockSetDone`(`homeworkId`: kotlin.String, `done`: kotlin.Boolean)
+    
+    suspend fun `mockStaff`(): List<StaffTeacher>
     
     suspend fun `mockTimetable`(`week`: kotlin.UByte): List<List<Lesson>>
     
@@ -1594,6 +1610,8 @@ public interface PronoteClientInterface {
     suspend fun `params`(): Params
     
     suspend fun `setDone`(`homeworkId`: kotlin.String, `done`: kotlin.Boolean)
+    
+    suspend fun `staff`(): List<StaffTeacher>
     
     suspend fun `timetable`(`week`: kotlin.UByte): List<List<Lesson>>
     
@@ -1786,26 +1804,6 @@ open class PronoteClient: Disposable, AutoCloseable, PronoteClientInterface
 
     
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `getAttachment`(`attachment`: Attachment) : kotlin.String {
-        return uniffiRustCallAsync(
-        callWithHandle { uniffiHandle ->
-            UniffiLib.uniffi_pronote_rs_fn_method_pronoteclient_get_attachment(
-                uniffiHandle,
-                FfiConverterTypeAttachment.lower(`attachment`),
-            )
-        },
-        { future, callback, continuation -> UniffiLib.ffi_pronote_rs_rust_future_poll_rust_buffer(future, callback, continuation) },
-        { future, continuation -> UniffiLib.ffi_pronote_rs_rust_future_complete_rust_buffer(future, continuation) },
-        { future -> UniffiLib.ffi_pronote_rs_rust_future_free_rust_buffer(future) },
-        // lift function
-        { FfiConverterString.lift(it) },
-        // Error FFI converter
-        UniffiNullRustCallStatusErrorHandler,
-    )
-    }
-
-    
-    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
     override suspend fun `getWeek`(`date`: kotlin.String) : kotlin.UByte {
         return uniffiRustCallAsync(
         callWithHandle { uniffiHandle ->
@@ -1953,12 +1951,12 @@ open class PronoteClient: Disposable, AutoCloseable, PronoteClientInterface
     
     @Throws(Exception::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `mockDocuments`() : Resources {
+    override suspend fun `mockDocuments`(`firstWeek`: kotlin.UByte, `lastWeek`: kotlin.UByte) : Resources {
         return uniffiRustCallAsync(
         callWithHandle { uniffiHandle ->
             UniffiLib.uniffi_pronote_rs_fn_method_pronoteclient_mock_documents(
                 uniffiHandle,
-                
+                FfiConverterUByte.lower(`firstWeek`),FfiConverterUByte.lower(`lastWeek`),
             )
         },
         { future, callback, continuation -> UniffiLib.ffi_pronote_rs_rust_future_poll_rust_buffer(future, callback, continuation) },
@@ -2058,12 +2056,12 @@ open class PronoteClient: Disposable, AutoCloseable, PronoteClientInterface
     
     @Throws(Exception::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `mockMessages`() : Messages {
+    override suspend fun `mockMessages`(`possessions`: List<Possession>) : Messages {
         return uniffiRustCallAsync(
         callWithHandle { uniffiHandle ->
             UniffiLib.uniffi_pronote_rs_fn_method_pronoteclient_mock_messages(
                 uniffiHandle,
-                
+                FfiConverterSequenceTypePossession.lower(`possessions`),
             )
         },
         { future, callback, continuation -> UniffiLib.ffi_pronote_rs_rust_future_poll_rust_buffer(future, callback, continuation) },
@@ -2100,10 +2098,53 @@ open class PronoteClient: Disposable, AutoCloseable, PronoteClientInterface
     
     @Throws(Exception::class)
     @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
-    override suspend fun `mockNewsItemContent`() : List<Question> {
+    override suspend fun `mockNewsItemContent`(`newsItemId`: kotlin.String) : List<Question> {
         return uniffiRustCallAsync(
         callWithHandle { uniffiHandle ->
             UniffiLib.uniffi_pronote_rs_fn_method_pronoteclient_mock_news_item_content(
+                uniffiHandle,
+                FfiConverterString.lower(`newsItemId`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.ffi_pronote_rs_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.ffi_pronote_rs_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.ffi_pronote_rs_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterSequenceTypeQuestion.lift(it) },
+        // Error FFI converter
+        Exception.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(Exception::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `mockSetDone`(`homeworkId`: kotlin.String, `done`: kotlin.Boolean) {
+        return uniffiRustCallAsync(
+        callWithHandle { uniffiHandle ->
+            UniffiLib.uniffi_pronote_rs_fn_method_pronoteclient_mock_set_done(
+                uniffiHandle,
+                FfiConverterString.lower(`homeworkId`),FfiConverterBoolean.lower(`done`),
+            )
+        },
+        { future, callback, continuation -> UniffiLib.ffi_pronote_rs_rust_future_poll_void(future, callback, continuation) },
+        { future, continuation -> UniffiLib.ffi_pronote_rs_rust_future_complete_void(future, continuation) },
+        { future -> UniffiLib.ffi_pronote_rs_rust_future_free_void(future) },
+        // lift function
+        { Unit },
+        
+        // Error FFI converter
+        Exception.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(Exception::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `mockStaff`() : List<StaffTeacher> {
+        return uniffiRustCallAsync(
+        callWithHandle { uniffiHandle ->
+            UniffiLib.uniffi_pronote_rs_fn_method_pronoteclient_mock_staff(
                 uniffiHandle,
                 
             )
@@ -2112,7 +2153,7 @@ open class PronoteClient: Disposable, AutoCloseable, PronoteClientInterface
         { future, continuation -> UniffiLib.ffi_pronote_rs_rust_future_complete_rust_buffer(future, continuation) },
         { future -> UniffiLib.ffi_pronote_rs_rust_future_free_rust_buffer(future) },
         // lift function
-        { FfiConverterSequenceTypeQuestion.lift(it) },
+        { FfiConverterSequenceTypeStaffTeacher.lift(it) },
         // Error FFI converter
         Exception.ErrorHandler,
     )
@@ -2258,6 +2299,27 @@ open class PronoteClient: Disposable, AutoCloseable, PronoteClientInterface
         // lift function
         { Unit },
         
+        // Error FFI converter
+        Exception.ErrorHandler,
+    )
+    }
+
+    
+    @Throws(Exception::class)
+    @Suppress("ASSIGNED_BUT_NEVER_ACCESSED_VARIABLE")
+    override suspend fun `staff`() : List<StaffTeacher> {
+        return uniffiRustCallAsync(
+        callWithHandle { uniffiHandle ->
+            UniffiLib.uniffi_pronote_rs_fn_method_pronoteclient_staff(
+                uniffiHandle,
+                
+            )
+        },
+        { future, callback, continuation -> UniffiLib.ffi_pronote_rs_rust_future_poll_rust_buffer(future, callback, continuation) },
+        { future, continuation -> UniffiLib.ffi_pronote_rs_rust_future_complete_rust_buffer(future, continuation) },
+        { future -> UniffiLib.ffi_pronote_rs_rust_future_free_rust_buffer(future) },
+        // lift function
+        { FfiConverterSequenceTypeStaffTeacher.lift(it) },
         // Error FFI converter
         Exception.ErrorHandler,
     )
@@ -3383,7 +3445,7 @@ data class Grade (
     , 
     var `date`: kotlin.String
     , 
-    var `subject`: Subject
+    var `subject`: GradeSubject
     , 
     var `description`: kotlin.String
     , 
@@ -3421,7 +3483,7 @@ public object FfiConverterTypeGrade: FfiConverterRustBuffer<Grade> {
             FfiConverterUInt.read(buf),
             FfiConverterUInt.read(buf),
             FfiConverterString.read(buf),
-            FfiConverterTypeSubject.read(buf),
+            FfiConverterTypeGradeSubject.read(buf),
             FfiConverterString.read(buf),
             FfiConverterOptionalFloat.read(buf),
             FfiConverterBoolean.read(buf),
@@ -3440,7 +3502,7 @@ public object FfiConverterTypeGrade: FfiConverterRustBuffer<Grade> {
             FfiConverterUInt.allocationSize(value.`scale`) +
             FfiConverterUInt.allocationSize(value.`defaultScale`) +
             FfiConverterString.allocationSize(value.`date`) +
-            FfiConverterTypeSubject.allocationSize(value.`subject`) +
+            FfiConverterTypeGradeSubject.allocationSize(value.`subject`) +
             FfiConverterString.allocationSize(value.`description`) +
             FfiConverterOptionalFloat.allocationSize(value.`weight`) +
             FfiConverterBoolean.allocationSize(value.`isOptional`) +
@@ -3458,7 +3520,7 @@ public object FfiConverterTypeGrade: FfiConverterRustBuffer<Grade> {
             FfiConverterUInt.write(value.`scale`, buf)
             FfiConverterUInt.write(value.`defaultScale`, buf)
             FfiConverterString.write(value.`date`, buf)
-            FfiConverterTypeSubject.write(value.`subject`, buf)
+            FfiConverterTypeGradeSubject.write(value.`subject`, buf)
             FfiConverterString.write(value.`description`, buf)
             FfiConverterOptionalFloat.write(value.`weight`, buf)
             FfiConverterBoolean.write(value.`isOptional`, buf)
@@ -3466,6 +3528,44 @@ public object FfiConverterTypeGrade: FfiConverterRustBuffer<Grade> {
             FfiConverterBoolean.write(value.`isGroupWork`, buf)
             FfiConverterTypePeriod.write(value.`period`, buf)
             FfiConverterOptionalTypeAttachment.write(value.`solution`, buf)
+    }
+}
+
+
+
+data class GradeSubject (
+    var `subject`: Subject
+    , 
+    var `color`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGradeSubject: FfiConverterRustBuffer<GradeSubject> {
+    override fun read(buf: ByteBuffer): GradeSubject {
+        return GradeSubject(
+            FfiConverterTypeSubject.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GradeSubject) = (
+            FfiConverterTypeSubject.allocationSize(value.`subject`) +
+            FfiConverterString.allocationSize(value.`color`)
+    )
+
+    override fun write(value: GradeSubject, buf: ByteBuffer) {
+            FfiConverterTypeSubject.write(value.`subject`, buf)
+            FfiConverterString.write(value.`color`, buf)
     }
 }
 
@@ -3484,7 +3584,7 @@ data class Grades (
     , 
     var `gradeAverages`: kotlin.Boolean
     , 
-    var `subjects`: List<Subject>
+    var `subjects`: List<GradesSubject>
     , 
     var `grades`: List<Grade>
     
@@ -3509,7 +3609,7 @@ public object FfiConverterTypeGrades: FfiConverterRustBuffer<Grades> {
             FfiConverterUInt.read(buf),
             FfiConverterBoolean.read(buf),
             FfiConverterBoolean.read(buf),
-            FfiConverterSequenceTypeSubject.read(buf),
+            FfiConverterSequenceTypeGradesSubject.read(buf),
             FfiConverterSequenceTypeGrade.read(buf),
         )
     }
@@ -3521,7 +3621,7 @@ public object FfiConverterTypeGrades: FfiConverterRustBuffer<Grades> {
             FfiConverterUInt.allocationSize(value.`averageDefaultScale`) +
             FfiConverterBoolean.allocationSize(value.`subjectAverages`) +
             FfiConverterBoolean.allocationSize(value.`gradeAverages`) +
-            FfiConverterSequenceTypeSubject.allocationSize(value.`subjects`) +
+            FfiConverterSequenceTypeGradesSubject.allocationSize(value.`subjects`) +
             FfiConverterSequenceTypeGrade.allocationSize(value.`grades`)
     )
 
@@ -3532,7 +3632,7 @@ public object FfiConverterTypeGrades: FfiConverterRustBuffer<Grades> {
             FfiConverterUInt.write(value.`averageDefaultScale`, buf)
             FfiConverterBoolean.write(value.`subjectAverages`, buf)
             FfiConverterBoolean.write(value.`gradeAverages`, buf)
-            FfiConverterSequenceTypeSubject.write(value.`subjects`, buf)
+            FfiConverterSequenceTypeGradesSubject.write(value.`subjects`, buf)
             FfiConverterSequenceTypeGrade.write(value.`grades`, buf)
     }
 }
@@ -3572,6 +3672,112 @@ public object FfiConverterTypeGradesDisconnection: FfiConverterRustBuffer<Grades
     override fun write(value: GradesDisconnection, buf: ByteBuffer) {
             FfiConverterUByte.write(value.`publicationTime`, buf)
             FfiConverterUByte.write(value.`publicationDelay`, buf)
+    }
+}
+
+
+
+data class GradesSubject (
+    var `subject`: Subject
+    , 
+    var `color`: kotlin.String
+    , 
+    var `order`: kotlin.UInt
+    , 
+    var `details`: GradesSubjectDetails
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGradesSubject: FfiConverterRustBuffer<GradesSubject> {
+    override fun read(buf: ByteBuffer): GradesSubject {
+        return GradesSubject(
+            FfiConverterTypeSubject.read(buf),
+            FfiConverterString.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterTypeGradesSubjectDetails.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GradesSubject) = (
+            FfiConverterTypeSubject.allocationSize(value.`subject`) +
+            FfiConverterString.allocationSize(value.`color`) +
+            FfiConverterUInt.allocationSize(value.`order`) +
+            FfiConverterTypeGradesSubjectDetails.allocationSize(value.`details`)
+    )
+
+    override fun write(value: GradesSubject, buf: ByteBuffer) {
+            FfiConverterTypeSubject.write(value.`subject`, buf)
+            FfiConverterString.write(value.`color`, buf)
+            FfiConverterUInt.write(value.`order`, buf)
+            FfiConverterTypeGradesSubjectDetails.write(value.`details`, buf)
+    }
+}
+
+
+
+data class GradesSubjectDetails (
+    var `average`: GradeValue
+    , 
+    var `classAverage`: GradeValue
+    , 
+    var `minAverage`: GradeValue
+    , 
+    var `maxAverage`: GradeValue
+    , 
+    var `averageScale`: kotlin.UInt
+    , 
+    var `defaultAverageScale`: kotlin.UInt
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeGradesSubjectDetails: FfiConverterRustBuffer<GradesSubjectDetails> {
+    override fun read(buf: ByteBuffer): GradesSubjectDetails {
+        return GradesSubjectDetails(
+            FfiConverterTypeGradeValue.read(buf),
+            FfiConverterTypeGradeValue.read(buf),
+            FfiConverterTypeGradeValue.read(buf),
+            FfiConverterTypeGradeValue.read(buf),
+            FfiConverterUInt.read(buf),
+            FfiConverterUInt.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: GradesSubjectDetails) = (
+            FfiConverterTypeGradeValue.allocationSize(value.`average`) +
+            FfiConverterTypeGradeValue.allocationSize(value.`classAverage`) +
+            FfiConverterTypeGradeValue.allocationSize(value.`minAverage`) +
+            FfiConverterTypeGradeValue.allocationSize(value.`maxAverage`) +
+            FfiConverterUInt.allocationSize(value.`averageScale`) +
+            FfiConverterUInt.allocationSize(value.`defaultAverageScale`)
+    )
+
+    override fun write(value: GradesSubjectDetails, buf: ByteBuffer) {
+            FfiConverterTypeGradeValue.write(value.`average`, buf)
+            FfiConverterTypeGradeValue.write(value.`classAverage`, buf)
+            FfiConverterTypeGradeValue.write(value.`minAverage`, buf)
+            FfiConverterTypeGradeValue.write(value.`maxAverage`, buf)
+            FfiConverterUInt.write(value.`averageScale`, buf)
+            FfiConverterUInt.write(value.`defaultAverageScale`, buf)
     }
 }
 
@@ -4477,6 +4683,44 @@ public object FfiConverterTypeNews: FfiConverterRustBuffer<News> {
 
 
 
+data class NewsAuthor (
+    var `person`: Person
+    , 
+    var `withDiscussion`: kotlin.Boolean
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeNewsAuthor: FfiConverterRustBuffer<NewsAuthor> {
+    override fun read(buf: ByteBuffer): NewsAuthor {
+        return NewsAuthor(
+            FfiConverterTypePerson.read(buf),
+            FfiConverterBoolean.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: NewsAuthor) = (
+            FfiConverterTypePerson.allocationSize(value.`person`) +
+            FfiConverterBoolean.allocationSize(value.`withDiscussion`)
+    )
+
+    override fun write(value: NewsAuthor, buf: ByteBuffer) {
+            FfiConverterTypePerson.write(value.`person`, buf)
+            FfiConverterBoolean.write(value.`withDiscussion`, buf)
+    }
+}
+
+
+
 data class NewsCategory (
     var `name`: kotlin.String
     , 
@@ -4605,7 +4849,7 @@ data class NewsItem (
     , 
     var `isAuthor`: kotlin.Boolean
     , 
-    var `author`: Person
+    var `author`: NewsAuthor
     , 
     var `studentName`: kotlin.String
     , 
@@ -4647,7 +4891,7 @@ public object FfiConverterTypeNewsItem: FfiConverterRustBuffer<NewsItem> {
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
             FfiConverterBoolean.read(buf),
-            FfiConverterTypePerson.read(buf),
+            FfiConverterTypeNewsAuthor.read(buf),
             FfiConverterString.read(buf),
             FfiConverterTypePerson.read(buf),
             FfiConverterBoolean.read(buf),
@@ -4671,7 +4915,7 @@ public object FfiConverterTypeNewsItem: FfiConverterRustBuffer<NewsItem> {
             FfiConverterString.allocationSize(value.`creationDate`) +
             FfiConverterString.allocationSize(value.`authorName`) +
             FfiConverterBoolean.allocationSize(value.`isAuthor`) +
-            FfiConverterTypePerson.allocationSize(value.`author`) +
+            FfiConverterTypeNewsAuthor.allocationSize(value.`author`) +
             FfiConverterString.allocationSize(value.`studentName`) +
             FfiConverterTypePerson.allocationSize(value.`student`) +
             FfiConverterBoolean.allocationSize(value.`isPublic`) +
@@ -4694,7 +4938,7 @@ public object FfiConverterTypeNewsItem: FfiConverterRustBuffer<NewsItem> {
             FfiConverterString.write(value.`creationDate`, buf)
             FfiConverterString.write(value.`authorName`, buf)
             FfiConverterBoolean.write(value.`isAuthor`, buf)
-            FfiConverterTypePerson.write(value.`author`, buf)
+            FfiConverterTypeNewsAuthor.write(value.`author`, buf)
             FfiConverterString.write(value.`studentName`, buf)
             FfiConverterTypePerson.write(value.`student`, buf)
             FfiConverterBoolean.write(value.`isPublic`, buf)
@@ -5046,9 +5290,7 @@ data class Person (
     , 
     var `id`: kotlin.String
     , 
-    var `group`: kotlin.UInt
-    , 
-    var `withDiscussion`: kotlin.Boolean
+    var `group`: kotlin.UInt?
     
 ){
     
@@ -5067,23 +5309,20 @@ public object FfiConverterTypePerson: FfiConverterRustBuffer<Person> {
         return Person(
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
-            FfiConverterUInt.read(buf),
-            FfiConverterBoolean.read(buf),
+            FfiConverterOptionalUInt.read(buf),
         )
     }
 
     override fun allocationSize(value: Person) = (
             FfiConverterString.allocationSize(value.`name`) +
             FfiConverterString.allocationSize(value.`id`) +
-            FfiConverterUInt.allocationSize(value.`group`) +
-            FfiConverterBoolean.allocationSize(value.`withDiscussion`)
+            FfiConverterOptionalUInt.allocationSize(value.`group`)
     )
 
     override fun write(value: Person, buf: ByteBuffer) {
             FfiConverterString.write(value.`name`, buf)
             FfiConverterString.write(value.`id`, buf)
-            FfiConverterUInt.write(value.`group`, buf)
-            FfiConverterBoolean.write(value.`withDiscussion`, buf)
+            FfiConverterOptionalUInt.write(value.`group`, buf)
     }
 }
 
@@ -5253,64 +5492,6 @@ public object FfiConverterTypeQuestion: FfiConverterRustBuffer<Question> {
 
 
 
-data class Resource (
-    var `group`: kotlin.UInt
-    , 
-    var `name`: kotlin.String
-    , 
-    var `id`: kotlin.String
-    , 
-    var `class`: Class
-    , 
-    var `periods`: Periods
-    , 
-    var `groups`: List<Class>
-    
-){
-    
-
-    
-
-    
-    companion object
-}
-
-/**
- * @suppress
- */
-public object FfiConverterTypeResource: FfiConverterRustBuffer<Resource> {
-    override fun read(buf: ByteBuffer): Resource {
-        return Resource(
-            FfiConverterUInt.read(buf),
-            FfiConverterString.read(buf),
-            FfiConverterString.read(buf),
-            FfiConverterTypeClass.read(buf),
-            FfiConverterTypePeriods.read(buf),
-            FfiConverterSequenceTypeClass.read(buf),
-        )
-    }
-
-    override fun allocationSize(value: Resource) = (
-            FfiConverterUInt.allocationSize(value.`group`) +
-            FfiConverterString.allocationSize(value.`name`) +
-            FfiConverterString.allocationSize(value.`id`) +
-            FfiConverterTypeClass.allocationSize(value.`class`) +
-            FfiConverterTypePeriods.allocationSize(value.`periods`) +
-            FfiConverterSequenceTypeClass.allocationSize(value.`groups`)
-    )
-
-    override fun write(value: Resource, buf: ByteBuffer) {
-            FfiConverterUInt.write(value.`group`, buf)
-            FfiConverterString.write(value.`name`, buf)
-            FfiConverterString.write(value.`id`, buf)
-            FfiConverterTypeClass.write(value.`class`, buf)
-            FfiConverterTypePeriods.write(value.`periods`, buf)
-            FfiConverterSequenceTypeClass.write(value.`groups`, buf)
-    }
-}
-
-
-
 data class Resources (
     var `lessonDetails`: List<LessonDetails>
     , 
@@ -5445,6 +5626,135 @@ public object FfiConverterTypeSchool: FfiConverterRustBuffer<School> {
 
 
 
+data class StaffSubject (
+    var `subject`: Subject
+    , 
+    var `color`: kotlin.String
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeStaffSubject: FfiConverterRustBuffer<StaffSubject> {
+    override fun read(buf: ByteBuffer): StaffSubject {
+        return StaffSubject(
+            FfiConverterTypeSubject.read(buf),
+            FfiConverterString.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: StaffSubject) = (
+            FfiConverterTypeSubject.allocationSize(value.`subject`) +
+            FfiConverterString.allocationSize(value.`color`)
+    )
+
+    override fun write(value: StaffSubject, buf: ByteBuffer) {
+            FfiConverterTypeSubject.write(value.`subject`, buf)
+            FfiConverterString.write(value.`color`, buf)
+    }
+}
+
+
+
+data class StaffTeacher (
+    var `person`: Person
+    , 
+    var `isPrimaryTeacher`: kotlin.Boolean
+    , 
+    var `subjects`: List<StaffSubject>
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeStaffTeacher: FfiConverterRustBuffer<StaffTeacher> {
+    override fun read(buf: ByteBuffer): StaffTeacher {
+        return StaffTeacher(
+            FfiConverterTypePerson.read(buf),
+            FfiConverterBoolean.read(buf),
+            FfiConverterSequenceTypeStaffSubject.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: StaffTeacher) = (
+            FfiConverterTypePerson.allocationSize(value.`person`) +
+            FfiConverterBoolean.allocationSize(value.`isPrimaryTeacher`) +
+            FfiConverterSequenceTypeStaffSubject.allocationSize(value.`subjects`)
+    )
+
+    override fun write(value: StaffTeacher, buf: ByteBuffer) {
+            FfiConverterTypePerson.write(value.`person`, buf)
+            FfiConverterBoolean.write(value.`isPrimaryTeacher`, buf)
+            FfiConverterSequenceTypeStaffSubject.write(value.`subjects`, buf)
+    }
+}
+
+
+
+data class Student (
+    var `person`: Person
+    , 
+    var `class`: Class
+    , 
+    var `periods`: Periods
+    , 
+    var `groups`: List<Class>
+    
+){
+    
+
+    
+
+    
+    companion object
+}
+
+/**
+ * @suppress
+ */
+public object FfiConverterTypeStudent: FfiConverterRustBuffer<Student> {
+    override fun read(buf: ByteBuffer): Student {
+        return Student(
+            FfiConverterTypePerson.read(buf),
+            FfiConverterTypeClass.read(buf),
+            FfiConverterTypePeriods.read(buf),
+            FfiConverterSequenceTypeClass.read(buf),
+        )
+    }
+
+    override fun allocationSize(value: Student) = (
+            FfiConverterTypePerson.allocationSize(value.`person`) +
+            FfiConverterTypeClass.allocationSize(value.`class`) +
+            FfiConverterTypePeriods.allocationSize(value.`periods`) +
+            FfiConverterSequenceTypeClass.allocationSize(value.`groups`)
+    )
+
+    override fun write(value: Student, buf: ByteBuffer) {
+            FfiConverterTypePerson.write(value.`person`, buf)
+            FfiConverterTypeClass.write(value.`class`, buf)
+            FfiConverterTypePeriods.write(value.`periods`, buf)
+            FfiConverterSequenceTypeClass.write(value.`groups`, buf)
+    }
+}
+
+
+
 data class Subject (
     var `name`: kotlin.String
     , 
@@ -5453,18 +5763,6 @@ data class Subject (
     var `color`: kotlin.String
     , 
     var `order`: kotlin.UInt
-    , 
-    var `average`: GradeValue
-    , 
-    var `classAverage`: GradeValue
-    , 
-    var `minAverage`: GradeValue
-    , 
-    var `maxAverage`: GradeValue
-    , 
-    var `averageScale`: kotlin.UInt
-    , 
-    var `defaultAverageScale`: kotlin.UInt
     
 ){
     
@@ -5485,12 +5783,6 @@ public object FfiConverterTypeSubject: FfiConverterRustBuffer<Subject> {
             FfiConverterString.read(buf),
             FfiConverterString.read(buf),
             FfiConverterUInt.read(buf),
-            FfiConverterTypeGradeValue.read(buf),
-            FfiConverterTypeGradeValue.read(buf),
-            FfiConverterTypeGradeValue.read(buf),
-            FfiConverterTypeGradeValue.read(buf),
-            FfiConverterUInt.read(buf),
-            FfiConverterUInt.read(buf),
         )
     }
 
@@ -5498,13 +5790,7 @@ public object FfiConverterTypeSubject: FfiConverterRustBuffer<Subject> {
             FfiConverterString.allocationSize(value.`name`) +
             FfiConverterString.allocationSize(value.`id`) +
             FfiConverterString.allocationSize(value.`color`) +
-            FfiConverterUInt.allocationSize(value.`order`) +
-            FfiConverterTypeGradeValue.allocationSize(value.`average`) +
-            FfiConverterTypeGradeValue.allocationSize(value.`classAverage`) +
-            FfiConverterTypeGradeValue.allocationSize(value.`minAverage`) +
-            FfiConverterTypeGradeValue.allocationSize(value.`maxAverage`) +
-            FfiConverterUInt.allocationSize(value.`averageScale`) +
-            FfiConverterUInt.allocationSize(value.`defaultAverageScale`)
+            FfiConverterUInt.allocationSize(value.`order`)
     )
 
     override fun write(value: Subject, buf: ByteBuffer) {
@@ -5512,19 +5798,13 @@ public object FfiConverterTypeSubject: FfiConverterRustBuffer<Subject> {
             FfiConverterString.write(value.`id`, buf)
             FfiConverterString.write(value.`color`, buf)
             FfiConverterUInt.write(value.`order`, buf)
-            FfiConverterTypeGradeValue.write(value.`average`, buf)
-            FfiConverterTypeGradeValue.write(value.`classAverage`, buf)
-            FfiConverterTypeGradeValue.write(value.`minAverage`, buf)
-            FfiConverterTypeGradeValue.write(value.`maxAverage`, buf)
-            FfiConverterUInt.write(value.`averageScale`, buf)
-            FfiConverterUInt.write(value.`defaultAverageScale`, buf)
     }
 }
 
 
 
 data class UserParams (
-    var `resource`: Resource
+    var `student`: Student
     , 
     var `allowedTabs`: List<kotlin.ULong>
     , 
@@ -5551,7 +5831,7 @@ data class UserParams (
 public object FfiConverterTypeUserParams: FfiConverterRustBuffer<UserParams> {
     override fun read(buf: ByteBuffer): UserParams {
         return UserParams(
-            FfiConverterTypeResource.read(buf),
+            FfiConverterTypeStudent.read(buf),
             FfiConverterSequenceULong.read(buf),
             FfiConverterTypePermissions.read(buf),
             FfiConverterTypeDisconnectionInfos.read(buf),
@@ -5561,7 +5841,7 @@ public object FfiConverterTypeUserParams: FfiConverterRustBuffer<UserParams> {
     }
 
     override fun allocationSize(value: UserParams) = (
-            FfiConverterTypeResource.allocationSize(value.`resource`) +
+            FfiConverterTypeStudent.allocationSize(value.`student`) +
             FfiConverterSequenceULong.allocationSize(value.`allowedTabs`) +
             FfiConverterTypePermissions.allocationSize(value.`autorisations`) +
             FfiConverterTypeDisconnectionInfos.allocationSize(value.`disconnection`) +
@@ -5570,7 +5850,7 @@ public object FfiConverterTypeUserParams: FfiConverterRustBuffer<UserParams> {
     )
 
     override fun write(value: UserParams, buf: ByteBuffer) {
-            FfiConverterTypeResource.write(value.`resource`, buf)
+            FfiConverterTypeStudent.write(value.`student`, buf)
             FfiConverterSequenceULong.write(value.`allowedTabs`, buf)
             FfiConverterTypePermissions.write(value.`autorisations`, buf)
             FfiConverterTypeDisconnectionInfos.write(value.`disconnection`, buf)
@@ -6005,6 +6285,38 @@ public object FfiConverterTypeLoginMode: FfiConverterRustBuffer<LoginMode> {
 }
 
 
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterOptionalUInt: FfiConverterRustBuffer<kotlin.UInt?> {
+    override fun read(buf: ByteBuffer): kotlin.UInt? {
+        if (buf.get().toInt() == 0) {
+            return null
+        }
+        return FfiConverterUInt.read(buf)
+    }
+
+    override fun allocationSize(value: kotlin.UInt?): ULong {
+        if (value == null) {
+            return 1UL
+        } else {
+            return 1UL + FfiConverterUInt.allocationSize(value)
+        }
+    }
+
+    override fun write(value: kotlin.UInt?, buf: ByteBuffer) {
+        if (value == null) {
+            buf.put(0)
+        } else {
+            buf.put(1)
+            FfiConverterUInt.write(value, buf)
+        }
+    }
+}
 
 
 
@@ -6652,6 +6964,34 @@ public object FfiConverterSequenceTypeGrade: FfiConverterRustBuffer<List<Grade>>
 /**
  * @suppress
  */
+public object FfiConverterSequenceTypeGradesSubject: FfiConverterRustBuffer<List<GradesSubject>> {
+    override fun read(buf: ByteBuffer): List<GradesSubject> {
+        val len = buf.getInt()
+        return List<GradesSubject>(len) {
+            FfiConverterTypeGradesSubject.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<GradesSubject>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeGradesSubject.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<GradesSubject>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeGradesSubject.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
 public object FfiConverterSequenceTypeHoliday: FfiConverterRustBuffer<List<Holiday>> {
     override fun read(buf: ByteBuffer): List<Holiday> {
         val len = buf.getInt()
@@ -7034,6 +7374,62 @@ public object FfiConverterSequenceTypeSchool: FfiConverterRustBuffer<List<School
         buf.putInt(value.size)
         value.iterator().forEach {
             FfiConverterTypeSchool.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeStaffSubject: FfiConverterRustBuffer<List<StaffSubject>> {
+    override fun read(buf: ByteBuffer): List<StaffSubject> {
+        val len = buf.getInt()
+        return List<StaffSubject>(len) {
+            FfiConverterTypeStaffSubject.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<StaffSubject>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeStaffSubject.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<StaffSubject>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeStaffSubject.write(it, buf)
+        }
+    }
+}
+
+
+
+
+/**
+ * @suppress
+ */
+public object FfiConverterSequenceTypeStaffTeacher: FfiConverterRustBuffer<List<StaffTeacher>> {
+    override fun read(buf: ByteBuffer): List<StaffTeacher> {
+        val len = buf.getInt()
+        return List<StaffTeacher>(len) {
+            FfiConverterTypeStaffTeacher.read(buf)
+        }
+    }
+
+    override fun allocationSize(value: List<StaffTeacher>): ULong {
+        val sizeForLength = 4UL
+        val sizeForItems = value.map { FfiConverterTypeStaffTeacher.allocationSize(it) }.sum()
+        return sizeForLength + sizeForItems
+    }
+
+    override fun write(value: List<StaffTeacher>, buf: ByteBuffer) {
+        buf.putInt(value.size)
+        value.iterator().forEach {
+            FfiConverterTypeStaffTeacher.write(it, buf)
         }
     }
 }
