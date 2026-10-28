@@ -138,7 +138,6 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
         scope.launch {
             try {
                 val client = if (MOCK) {
-                    delay(1000.milliseconds)
                     PronoteClient.mock()
                 } else {
                     PronoteClient.login(rootUrl, username, password)

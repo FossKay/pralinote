@@ -31,7 +31,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.example.pralinote.model.AppClient
@@ -62,6 +61,15 @@ fun formatSubject(subject: String): String {
         }
 }
 
+fun getWeek(date: LocalDate): UByte {
+    val days = ChronoUnit.DAYS.between(
+        getDate(AppClient.params!!.firstDay),
+        date
+    )
+
+    return (days / 7 + 1).toUByte()
+}
+
 fun getColor(color: Color, isDark: Boolean): Color {
     val hsl = FloatArray(3)
     ColorUtils.colorToHSL(
@@ -77,7 +85,7 @@ fun getColor(color: Color, isDark: Boolean): Color {
 }
 
 suspend fun isHoliday(date: LocalDate): Boolean {
-    val holidays = AppClient.instance!!.params().holidays
+    val holidays = AppClient.params!!.holidays
 
     return holidays.any {
         val start = getDate(it.start)
@@ -88,7 +96,7 @@ suspend fun isHoliday(date: LocalDate): Boolean {
 }
 
 suspend fun toWorkDate(date: LocalDate): LocalDate {
-    val n = AppClient.instance!!.params().weekDays.toInt()
+    val n = AppClient.params!!.weekDays.toInt()
     var result = date
 
     while (result.dayOfWeek.value > n || isHoliday(result)) {
@@ -99,7 +107,7 @@ suspend fun toWorkDate(date: LocalDate): LocalDate {
 }
 
 suspend fun nextWorkDate(date: LocalDate, hour: Int = 12): LocalDate {
-    val n = AppClient.instance!!.params().weekDays.toInt()
+    val n = AppClient.params!!.weekDays.toInt()
     var result = when {
         date.dayOfWeek.value > n -> date.plusDays((8 - date.dayOfWeek.value).toLong())
         hour < 12 -> date
@@ -115,7 +123,7 @@ suspend fun nextWorkDate(date: LocalDate, hour: Int = 12): LocalDate {
 }
 
 suspend fun previousWorkDate(date: LocalDate): LocalDate {
-    val n = AppClient.instance!!.params().weekDays.toInt()
+    val n = AppClient.params!!.weekDays.toInt()
     var result = when {
         date.dayOfWeek.value > n -> date.minusDays((date.dayOfWeek.value - n).toLong())
         date.dayOfWeek.value > 1 -> date.minusDays(1)
@@ -136,7 +144,8 @@ fun prettyDate(date: LocalDate): String {
         0L -> "Aujourd'hui"
         1L -> "Demain"
         in 2L..7L -> getDayOfWeek(date)
-        else -> "${date.dayOfMonth} ${getMonth(date)}"
+        else -> "${date.dayOfMonth} ${getMonth(date)}" +
+                if (today.year != date.year) " ${date.year}" else ""
     }
 }
 

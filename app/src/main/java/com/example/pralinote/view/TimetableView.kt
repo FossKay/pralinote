@@ -22,6 +22,7 @@ import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Coffee
 import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,10 +46,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.pralinote.model.AgendaModel
 import com.example.pralinote.model.AppClient
 import com.example.pralinote.model.HomeModel
 import com.example.pralinote.model.TimetableModel
 import kotlinx.coroutines.launch
+import uniffi.pronote_rs.Event
 import uniffi.pronote_rs.Lesson
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -122,11 +125,7 @@ fun Class(lesson: Lesson, showEnd: Boolean) {
                         modifier = Modifier
                             .clip(
                                 RoundedCornerShape(
-                                    topStart = 8.dp,
-                                    bottomStart = 8.dp,
-
-                                    topEnd = 16.dp,
-                                    bottomEnd = 16.dp,
+                                    8.dp
                                 )
                             )
                             .height(IntrinsicSize.Min)
@@ -135,7 +134,7 @@ fun Class(lesson: Lesson, showEnd: Boolean) {
                                 brush = Brush.linearGradient(
                                     colors = listOf(
                                         color.copy(alpha = 0.5f),
-                                        Color.Transparent
+                                        Color.Transparent,
                                     )
                                 )
                             )
@@ -147,65 +146,61 @@ fun Class(lesson: Lesson, showEnd: Boolean) {
                                 .width(8.dp)
                                 .background(color)
                         )
-                        Box(modifier = Modifier.fillMaxWidth()) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 12.dp, vertical = 12.dp)
-                            ) {
-                                Column {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp, vertical = 12.dp)
+                        ) {
+                            Text(
+                                formatSubject(lesson.content.subject.name),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            Text(
+                                listOf(
+                                    lesson.content.teachers.joinToString(", ") {
+                                        it.split(" ").first()
+                                    },
+                                    lesson.content.group.orEmpty(),
+                                    lesson.content.classroom.joinToString(", ") { it.name }
+                                )
+                                    .filter { it.isNotBlank() }
+                                    .joinToString(", "),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                            if (lesson.note.isNotEmpty()) {
+                                Spacer(modifier = Modifier.padding(top = 4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(MaterialTheme.colorScheme.surfaceContainer)
+                                ) {
                                     Text(
-                                        formatSubject(lesson.content.subject.name),
-                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(
+                                            horizontal = 8.dp,
+                                            vertical = 4.dp,
+                                        ),
+                                        text = lesson.note,
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
+                                }
+                            }
+                            if (lesson.status.isNotEmpty()) {
+                                Spacer(modifier = Modifier.padding(top = 4.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(6.dp))
+                                        .background(MaterialTheme.colorScheme.errorContainer)
+                                ) {
                                     Text(
-                                        listOf(
-                                            lesson.content.teachers.joinToString(", ") {
-                                                it.split(" ").first()
-                                            },
-                                            lesson.content.group.orEmpty(),
-                                            lesson.content.classroom.joinToString(", ") { it.name }
-                                        )
-                                            .filter { it.isNotBlank() }
-                                            .joinToString(", "),
+                                        modifier = Modifier.padding(
+                                            horizontal = 8.dp,
+                                            vertical = 4.dp,
+                                        ),
+                                        text = lesson.status,
+                                        color = MaterialTheme.colorScheme.onErrorContainer,
                                         style = MaterialTheme.typography.bodyMedium,
                                     )
-                                    if (lesson.note.isNotEmpty()) {
-                                        Spacer(modifier = Modifier.padding(top = 4.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(6.dp))
-                                                .background(MaterialTheme.colorScheme.surfaceContainer)
-                                        ) {
-                                            Text(
-                                                modifier = Modifier.padding(
-                                                    horizontal = 8.dp,
-                                                    vertical = 4.dp,
-                                                ),
-                                                text = lesson.note,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                            )
-                                        }
-                                    }
-                                    if (lesson.status.isNotEmpty()) {
-                                        Spacer(modifier = Modifier.padding(top = 4.dp))
-                                        Box(
-                                            modifier = Modifier
-                                                .clip(RoundedCornerShape(6.dp))
-                                                .background(MaterialTheme.colorScheme.errorContainer)
-                                        ) {
-                                            Text(
-                                                modifier = Modifier.padding(
-                                                    horizontal = 8.dp,
-                                                    vertical = 4.dp,
-                                                ),
-                                                text = lesson.status,
-                                                color = MaterialTheme.colorScheme.onErrorContainer,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                            )
-                                        }
-                                    }
                                 }
                             }
                         }
@@ -221,9 +216,11 @@ fun HomeTimetableView(
     paddingValues: PaddingValues,
     homeViewModel: HomeModel = viewModel(),
     timetableViewModel: TimetableModel = viewModel(),
+    agendaViewModel: AgendaModel = viewModel(),
 ) {
     val homeState by homeViewModel.home.collectAsStateWithLifecycle()
     val timetableState by timetableViewModel.timetable.collectAsStateWithLifecycle()
+    val agendaState by agendaViewModel.agenda.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
     var selectedDate by rememberSaveable { mutableStateOf<String?>(null) }
@@ -249,10 +246,19 @@ fun HomeTimetableView(
         if (selectedDate == null || selectedDate == homeState.home?.date || selectedDate == homeState.home?.nextDate) {
             return@LaunchedEffect
         }
-        val week = AppClient.instance!!.getWeek(selectedDate!!)
+        val week = getWeek(getDate(selectedDate!!))
         selectedWeek = week.toInt()
         if (week !in timetableState.timetable && week !in timetableState.loading && week !in timetableState.error) {
             timetableViewModel.loadWeek(week)
+        }
+        val fetchAgenda =
+            getDate(selectedDate!!) < getDate(
+                homeState.home!!.events.first().start.split(" ").first()
+            ) || getDate(selectedDate!!) > getDate(
+                homeState.home!!.events.last().start.split(" ").first()
+            )
+        if (agendaState.agenda == null && fetchAgenda) {
+            agendaViewModel.loadAgenda()
         }
     }
 
@@ -264,14 +270,16 @@ fun HomeTimetableView(
                     date = localDate,
                     onPrevious = {
                         scope.launch {
-                            selectedDate = dateToString(previousWorkDate(localDate))
-                            selectedWeek = AppClient.instance!!.getWeek(selectedDate!!).toInt()
+                            val date = previousWorkDate(localDate)
+                            selectedDate = dateToString(date)
+                            selectedWeek = getWeek(date).toInt()
                         }
                     },
                     onNext = {
                         scope.launch {
-                            selectedDate = dateToString(nextWorkDate(localDate))
-                            selectedWeek = AppClient.instance!!.getWeek(selectedDate!!).toInt()
+                            val date = nextWorkDate(localDate)
+                            selectedDate = dateToString(date)
+                            selectedWeek = getWeek(date).toInt()
                         }
                     },
                 )
@@ -290,17 +298,29 @@ fun HomeTimetableView(
             }
 
             else -> {
+                val fetchAgenda =
+                    getDate(selectedDate!!) < getDate(
+                        homeState.home!!.events.first().start.split(" ").first()
+                    ) || getDate(selectedDate!!) > getDate(
+                        homeState.home!!.events.last().start.split(" ").first()
+                    )
+                val agendaLoading = agendaState.agenda == null && fetchAgenda
+                val agenda = (agendaState.agenda?.events ?: homeState.home!!.events).filter {
+                    getDate(it.start.split(" ").first()) <= getDate(selectedDate!!) &&
+                            getDate(selectedDate!!) <= getDate(it.end.split(" ").first())
+                }
+
                 when (selectedDate!!) {
                     homeState.home?.date -> {
-                        Timetable(homeState.home!!.lessons)
+                        Timetable(homeState.home!!.lessons, agenda, agendaLoading)
                     }
 
                     homeState.home?.nextDate -> {
-                        Timetable(homeState.home!!.nextLessons)
+                        Timetable(homeState.home!!.nextLessons, agenda, agendaLoading)
                     }
 
                     else -> {
-                        val week = selectedWeek!!.toUByte()
+                        val week = selectedWeek!!.toUByte() // u8
                         val isLoading = week in timetableState.loading
                         val error = timetableState.error[week]
                         val weekLessons = timetableState.timetable[week]
@@ -310,7 +330,7 @@ fun HomeTimetableView(
                             error != null -> ErrorView(error)
                             weekLessons != null -> {
                                 val weekDay = getDate(selectedDate!!).dayOfWeek.value - 1
-                                Timetable(weekLessons[weekDay])
+                                Timetable(weekLessons[weekDay], agenda, agendaLoading)
                             }
 
                             else -> LoadingView()
@@ -324,11 +344,25 @@ fun HomeTimetableView(
 
 @Composable
 fun Timetable(
-    lessons: List<Lesson>
+    lessons: List<Lesson>,
+    events: List<Event>,
+    eventsLoading: Boolean,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(bottom = 16.dp),
     ) {
+        item {
+            when {
+                eventsLoading -> LoadingView()
+                else -> {
+                    Column {
+                        events.forEach { item ->
+                            Event(item)
+                        }
+                    }
+                }
+            }
+        }
         if (lessons.isEmpty()) item {
             Text(
                 "Pas de cours",
@@ -346,6 +380,47 @@ fun Timetable(
     }
 }
 
+
+@Composable
+fun Event(event: Event) {
+    Box(
+        modifier = Modifier.padding(
+            start = 16.dp,
+            bottom = 12.dp,
+        ),
+    ) {
+        Row(
+            modifier = Modifier.height(IntrinsicSize.Min),
+        ) {
+            val color = getColor(Color(event.color.toColorInt()), isSystemInDarkTheme())
+
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(8.dp)
+                    .background(color)
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    event.title.trim(),
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                if (event.description.trim().isNotEmpty()) {
+                    Text(
+                        event.description.trim(),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun DatePicker(
     date: LocalDate,
@@ -355,8 +430,7 @@ fun DatePicker(
 ) {
     Row(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -366,7 +440,10 @@ fun DatePicker(
                 contentDescription = "Date précédente",
             )
         }
-        Text(text = prettyDate(date))
+        Text(
+            text = prettyDate(date),
+            style = MaterialTheme.typography.bodyMedium,
+        )
         IconButton(onClick = onNext) {
             Icon(
                 Icons.Outlined.ChevronRight,
