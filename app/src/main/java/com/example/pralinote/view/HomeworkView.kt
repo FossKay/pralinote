@@ -31,7 +31,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -91,6 +90,9 @@ fun Homework(
                         trimmed,
                         style = MaterialTheme.typography.bodyMedium
                     )
+                    homework.attachments.forEach { attachment ->
+                        AttachmentView(attachment)
+                    }
                 }
             }
         }

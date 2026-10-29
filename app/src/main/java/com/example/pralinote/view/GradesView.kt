@@ -34,10 +34,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -46,10 +44,8 @@ import com.example.pralinote.model.GradesModel
 import com.example.pralinote.model.HomeModel
 import uniffi.pronote_rs.Grade
 import uniffi.pronote_rs.GradeValue
-import uniffi.pronote_rs.Grades
 import uniffi.pronote_rs.Period
 import uniffi.pronote_rs.Periods
-import kotlin.collections.reversed
 
 
 @Composable
@@ -238,6 +234,9 @@ fun GradesList(grades: List<Grade>, footer: @Composable () -> Unit = {}) {
                                     grade.description,
                                     style = MaterialTheme.typography.bodyMedium,
                                 )
+                            }
+                            grade.solution?.let {
+                                AttachmentView(grade.solution!!)
                             }
                         }
                         Row {
