@@ -1,6 +1,7 @@
 package com.example.pralinote.view
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,20 +36,22 @@ import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.pralinote.model.HomeModel
+import com.example.pralinote.model.HomeworkDoneModel
 import com.example.pralinote.model.HomeworkModel
 import uniffi.pronote_rs.Homework
 
 @Composable
 fun Homework(
     homework: Homework,
+    homeworkDoneModel: HomeworkDoneModel = viewModel(),
 ) {
+    val state by homeworkDoneModel.homeworkDone.collectAsStateWithLifecycle()
+    val done = state.done[homework.id] ?: homework.done
+
     val color = getColor(Color(homework.color.toColorInt()), isSystemInDarkTheme())
     Row(
         modifier = Modifier
-            .padding(
-                horizontal = 8.dp,
-                vertical = 6.dp,
-            )
+            .padding(horizontal = 8.dp, vertical = 6.dp)
             .clip(
                 RoundedCornerShape(
                     topStart = 8.dp,
@@ -59,7 +62,12 @@ fun Homework(
             )
             .height(IntrinsicSize.Min)
             .background(MaterialTheme.colorScheme.surfaceContainer)
-            .alpha(if (homework.done) 0.5f else 1f)
+            .alpha(if (done) 0.5f else 1f)
+            .clickable {
+                if (homework.id !in state.loading && homework.id !in state.error) {
+                    homeworkDoneModel.setDone(homework.id, !done)
+                }
+            }
     ) {
         Box(
             modifier = Modifier
@@ -86,6 +94,10 @@ fun Homework(
                 }
             }
         }
+    }
+
+    if (homework.id in state.error) {
+        ErrorView(state.error[homework.id]!!)
     }
 }
 

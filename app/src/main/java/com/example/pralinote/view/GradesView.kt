@@ -188,7 +188,7 @@ fun GradesList(grades: List<Grade>, footer: @Composable () -> Unit = {}) {
         }
 
         items(grades.reversed()) { grade ->
-            val color = getColor(Color(grade.subject.color!!.toColorInt()), isSystemInDarkTheme())
+            val color = getColor(Color(grade.subject.color.toColorInt()), isSystemInDarkTheme())
             Row(
                 modifier = Modifier
                     .padding(horizontal = 8.dp, vertical = 4.dp)
