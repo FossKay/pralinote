@@ -4,7 +4,7 @@ import uniffi.pronote_rs.Params
 import uniffi.pronote_rs.PronoteClient
 import uniffi.pronote_rs.UserParams
 
-const val MOCK = true
+const val MOCK = false
 
 object AppClient {
     var instance: PronoteClient? = null;

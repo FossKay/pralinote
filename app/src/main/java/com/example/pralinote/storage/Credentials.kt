@@ -12,6 +12,7 @@ data class Credentials(
     val username: String,
     val password: String,
     val navIdentifier: String?,
+    val uuid: String?,
     val schoolName: String,
     val studentName: String,
     val color: String?,
@@ -32,6 +33,7 @@ class CredentialsStore(context: Context) :
                 username TEXT NOT NULL,
                 password TEXT NOT NULL,
                 nav_identifier TEXT,
+                uuid TEXT,
                 school_name TEXT NOT NULL,
                 student_name TEXT NOT NULL,
                 color TEXT,
@@ -69,6 +71,7 @@ class CredentialsStore(context: Context) :
                             username = cursor.getString(cursor.getColumnIndexOrThrow("username")),
                             password = cursor.getString(cursor.getColumnIndexOrThrow("password")),
                             navIdentifier = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("nav_identifier")),
+                            uuid = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("uuid")),
                             schoolName = cursor.getString(cursor.getColumnIndexOrThrow("school_name")),
                             studentName = cursor.getString(cursor.getColumnIndexOrThrow("student_name")),
                             color = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("color")),
@@ -100,6 +103,7 @@ class CredentialsStore(context: Context) :
                 username = cursor.getString(cursor.getColumnIndexOrThrow("username")),
                 password = cursor.getString(cursor.getColumnIndexOrThrow("password")),
                 navIdentifier = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("nav_identifier")),
+                uuid = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("uuid")),
                 schoolName = cursor.getString(cursor.getColumnIndexOrThrow("school_name")),
                 studentName = cursor.getString(cursor.getColumnIndexOrThrow("student_name")),
                 color = cursor.getStringOrNull(cursor.getColumnIndexOrThrow("color")),
@@ -118,6 +122,7 @@ class CredentialsStore(context: Context) :
             put("username", credentials.username)
             put("password", credentials.password)
             put("nav_identifier", credentials.navIdentifier)
+            put("uuid", credentials.uuid)
             put("school_name", credentials.schoolName)
             put("student_name", credentials.studentName)
             put("color", credentials.color)

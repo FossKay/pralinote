@@ -2,11 +2,13 @@ package com.example.pralinote.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uniffi.pronote_rs.Lesson
 
 data class TimetableState(
@@ -29,7 +31,9 @@ class TimetableModel : ViewModel() {
             }
             try {
                 val client = AppClient.instance!!
-                val lessons = if (MOCK) client.mockTimetable(week) else client.timetable(week)
+                val lessons = withContext(Dispatchers.IO) {
+                    if (MOCK) client.mockTimetable(week) else client.timetable(week)
+                }
                 _timetable.update {
                     it.copy(timetable = _timetable.value.timetable + (week to lessons))
                 }

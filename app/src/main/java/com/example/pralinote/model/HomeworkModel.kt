@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.example.pralinote.view.dateToString
 import com.example.pralinote.view.getDate
 import com.example.pralinote.view.nextWorkDate
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uniffi.pronote_rs.Homework
 import java.time.LocalDate
 
@@ -35,9 +37,11 @@ class HomeworkModel : ViewModel() {
                 val client = AppClient.instance!!
                 val nextDate = nextWorkDate(lastDate)
                 val firstWeek = client.getWeek(dateToString(nextDate))
-                val homework = if (MOCK) client.mockHomework(
-                    firstWeek, client.params().lastWeek
-                ) else client.homework(firstWeek, client.params().lastWeek)
+                val homework = withContext(Dispatchers.IO) {
+                    if (MOCK) client.mockHomework(
+                        firstWeek, client.params().lastWeek
+                    ) else client.homework(firstWeek, client.params().lastWeek)
+                }
                 _homework.update {
                     it.copy(homework = homework.filter { homework -> getDate(homework.dueDate) > lastDate })
                 }

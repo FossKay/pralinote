@@ -88,7 +88,7 @@ fun getColor(color: Color, isDark: Boolean): Color {
     return Color(ColorUtils.HSLToColor(hsl))
 }
 
-suspend fun isHoliday(date: LocalDate): Boolean {
+fun isHoliday(date: LocalDate): Boolean {
     val holidays = AppClient.params!!.holidays
 
     return holidays.any {
@@ -99,7 +99,7 @@ suspend fun isHoliday(date: LocalDate): Boolean {
     }
 }
 
-suspend fun toWorkDate(date: LocalDate): LocalDate {
+fun toWorkDate(date: LocalDate): LocalDate {
     val n = AppClient.params!!.weekDays.toInt()
     var result = date
 
@@ -110,7 +110,7 @@ suspend fun toWorkDate(date: LocalDate): LocalDate {
     return result
 }
 
-suspend fun nextWorkDate(date: LocalDate, hour: Int = 12): LocalDate {
+fun nextWorkDate(date: LocalDate, hour: Int = 12): LocalDate {
     val n = AppClient.params!!.weekDays.toInt()
     var result = when {
         date.dayOfWeek.value > n -> date.plusDays((8 - date.dayOfWeek.value).toLong())
@@ -126,7 +126,7 @@ suspend fun nextWorkDate(date: LocalDate, hour: Int = 12): LocalDate {
     return result
 }
 
-suspend fun previousWorkDate(date: LocalDate): LocalDate {
+fun previousWorkDate(date: LocalDate): LocalDate {
     val n = AppClient.params!!.weekDays.toInt()
     var result = when {
         date.dayOfWeek.value > n -> date.minusDays((date.dayOfWeek.value - n).toLong())

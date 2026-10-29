@@ -145,7 +145,10 @@ impl PronoteClient {
     }
 
     pub async fn agenda(&self) -> Result<Agenda, Error> {
-        self.c.lock().await.agenda().await
+        let mut guard = self.c.lock().await;
+        let result = guard.agenda().await;
+
+        result
     }
 
     pub async fn news(&self) -> Result<News, Error> {

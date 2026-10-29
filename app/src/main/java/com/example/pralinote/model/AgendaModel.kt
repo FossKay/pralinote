@@ -2,11 +2,13 @@ package com.example.pralinote.model
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uniffi.pronote_rs.Agenda
 
 data class AgendaState(
@@ -23,22 +25,32 @@ class AgendaModel : ViewModel() {
         if (_agenda.value.isLoading) {
             return
         }
+        _agenda.update {
+            it.copy(
+                isLoading = true,
+            )
+        }
         viewModelScope.launch {
-            _agenda.update {
-                it.copy(
-                    isLoading = true,
-                )
-            }
             try {
                 val client = AppClient.instance!!
-                val agenda = if (MOCK) client.mockAgenda() else client.agenda()
-                _agenda.update {
-                    it.copy(agenda = agenda)
+                // https://github.com/mozilla/uniffi-rs/issues/2953
+                // Without this, ANR when launching 2 parallel requests
+                val agenda = withContext(Dispatchers.IO) {
+                    if (MOCK) client.mockAgenda() else client.agenda()
                 }
-            } catch (e: Throwable) {
-                e.printStackTrace()
                 _agenda.update {
-                    it.copy(error = e)
+                    it.copy(
+                        agenda = agenda,
+                        isLoading = false,
+                        error = null
+                    )
+                }
+            } catch (e: Exception) {
+                _agenda.update {
+                    it.copy(
+                        isLoading = false,
+                        error = e
+                    )
                 }
             }
             _agenda.update {

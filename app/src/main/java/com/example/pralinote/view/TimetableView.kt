@@ -233,31 +233,64 @@ fun HomeTimetableView(
     }
 
     LaunchedEffect(homeState.home) {
-        if (selectedDate == null && homeState.home != null) {
+        val home = homeState.home ?: return@LaunchedEffect
+
+        if (selectedDate == null) {
             selectedDate = when {
-                homeState.home!!.nextDate == null -> homeState.home!!.date
-                LocalDateTime.now().hour > 12 || toWorkDate(LocalDate.now()) != LocalDate.now() -> homeState.home!!.nextDate
-                else -> homeState.home!!.date
+                home.nextDate == null -> home.date
+                LocalDateTime.now().hour > 12 ||
+                        toWorkDate(LocalDate.now()) != LocalDate.now() -> home.nextDate
+                else -> home.date
             }
         }
     }
 
-    LaunchedEffect(selectedDate) {
-        if (selectedDate == null || selectedDate == homeState.home?.date || selectedDate == homeState.home?.nextDate) {
+    LaunchedEffect(selectedDate, homeState.home) {
+        val dateString = selectedDate ?: return@LaunchedEffect
+        val home = homeState.home ?: return@LaunchedEffect
+
+        if (dateString == home.date || dateString == home.nextDate) {
             return@LaunchedEffect
         }
-        val week = getWeek(getDate(selectedDate!!))
+
+        val date = getDate(dateString)
+        val week = getWeek(date)
+
         selectedWeek = week.toInt()
-        if (week !in timetableState.timetable && week !in timetableState.loading && week !in timetableState.error) {
+
+        if (
+            week !in timetableState.timetable &&
+            week !in timetableState.loading &&
+            week !in timetableState.error
+        ) {
             timetableViewModel.loadWeek(week)
         }
-        val fetchAgenda =
-            getDate(selectedDate!!) < getDate(
-                homeState.home!!.events.first().start.split(" ").first()
-            ) || getDate(selectedDate!!) > getDate(
-                homeState.home!!.events.last().start.split(" ").first()
-            )
-        if (agendaState.agenda == null && fetchAgenda) {
+    }
+
+    LaunchedEffect(selectedDate, homeState.home, agendaState) {
+        if (selectedDate == null || homeState.home == null) {
+            return@LaunchedEffect
+        }
+
+        val dateString = selectedDate!!
+        val home = homeState.home!!
+
+        if (dateString == home.date || dateString == home.nextDate) {
+            return@LaunchedEffect
+        }
+
+        val date = getDate(dateString)
+
+        if (home.events.isEmpty()) {
+            return@LaunchedEffect
+        }
+
+        val firstDate = getDate(home.events.first().start.split(" ").first())
+        val lastDate = getDate(home.events.last().start.split(" ").first())
+
+        val fetchAgenda = date !in firstDate..lastDate
+
+        if (fetchAgenda && agendaState.agenda == null && agendaState.error == null && !agendaState.isLoading) {
             agendaViewModel.loadAgenda()
         }
     }
@@ -298,13 +331,7 @@ fun HomeTimetableView(
             }
 
             else -> {
-                val fetchAgenda =
-                    getDate(selectedDate!!) < getDate(
-                        homeState.home!!.events.first().start.split(" ").first()
-                    ) || getDate(selectedDate!!) > getDate(
-                        homeState.home!!.events.last().start.split(" ").first()
-                    )
-                val agendaLoading = agendaState.agenda == null && fetchAgenda
+                val agendaLoading = agendaState.isLoading
                 val agenda = (agendaState.agenda?.events ?: homeState.home!!.events).filter {
                     getDate(it.start.split(" ").first()) <= getDate(selectedDate!!) &&
                             getDate(selectedDate!!) <= getDate(it.end.split(" ").first())
