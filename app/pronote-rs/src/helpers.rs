@@ -215,7 +215,7 @@ where
     T: DeserializeOwned,
 {
     let mut value = Value::deserialize(deserializer)?;
-    println!("{value:#?}");
+    //println!("{value:#?}");
     let inner = value["V"].take();
 
     Ok(serde_json::from_value(inner).unwrap())
@@ -392,4 +392,3 @@ deser!(String, sticky_note, |value: Value| {
 deser!(String, reference_id, |value: Value| {
     Ok(value["V"]["N"].as_str().unwrap().into())
 });
-

@@ -217,4 +217,3 @@ fn parse_start(html: &str) -> Result<HashMap<String, String>, Error> {
 
     Ok(result)
 }
-
