@@ -120,6 +120,7 @@ pub struct Attachment {
 }
 
 impl Attachment {
+    // TODO: struggles with non-ASCII chars?
     pub fn get_link(
         &self,
         encryption: &crate::encryption::Encryption,
@@ -156,12 +157,6 @@ pub struct Subject {
     pub name: String,
     #[serde(rename = "N")]
     pub id: String,
-
-    // in grade subjects list
-    #[serde(rename = "couleur", default)]
-    pub color: String,
-    #[serde(rename = "ordre", default)]
-    pub order: u32,
 }
 
 #[derive(Debug, Clone, Deserialize, Record)]
@@ -184,8 +179,6 @@ pub struct GradeSubject {
 pub struct GradesSubject {
     #[serde(flatten)]
     pub subject: Subject,
-    #[serde(rename = "couleur")]
-    pub color: String,
     #[serde(rename = "ordre")]
     pub order: u32,
     #[serde(flatten)]
@@ -196,6 +189,8 @@ pub struct GradesSubject {
 
 #[derive(Debug, Clone, Deserialize, Record)]
 pub struct GradesSubjectDetails {
+    #[serde(rename = "couleur", default)]
+    pub color: String,
     #[serde(rename = "moyEleve", deserialize_with = "de_grade", default)]
     pub average: GradeValue,
     #[serde(rename = "moyClasse", deserialize_with = "de_grade", default)]
@@ -736,9 +731,9 @@ pub struct Event {
     #[serde(rename = "N")]
     pub id: String,
     #[serde(rename = "DateDebut", deserialize_with = "unwrap_v")]
-    pub start: String,
+    pub start: String, // datetime OR date
     #[serde(rename = "DateFin", deserialize_with = "unwrap_v")]
-    pub end: String,
+    pub end: String, // datetime OR date
     #[serde(rename = "datePublication", deserialize_with = "unwrap_v", default)]
     pub date_published: Option<String>,
     #[serde(rename = "Commentaire")]

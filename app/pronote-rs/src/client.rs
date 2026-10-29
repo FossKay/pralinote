@@ -478,6 +478,14 @@ impl Client {
         data.grades.retain(|x| &x.period.id == period_id);
         data.grades.sort_by_key(|x| date_int(&x.date));
 
+        for g in &mut data.grades {
+            if let Some(s) = &mut g.solution {
+                if s.link.is_empty() {
+                    s.link = self.get_attachment(&s);
+                }
+            }
+        }
+
         Ok(data)
     }
 
