@@ -45,8 +45,6 @@ import com.example.pralinote.model.HomeModel
 import uniffi.pronote_rs.Grade
 import uniffi.pronote_rs.GradeValue
 import uniffi.pronote_rs.Period
-import uniffi.pronote_rs.Periods
-
 
 @Composable
 fun GradesView(
@@ -56,11 +54,9 @@ fun GradesView(
 ) {
     val homeState by homeViewModel.home.collectAsStateWithLifecycle()
     val state by gradesViewModel.grades.collectAsStateWithLifecycle()
-    var periods by remember { mutableStateOf<Periods?>(null) }
-    var selected by remember { mutableStateOf<Period?>(null) }
+    var selected by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        periods = AppClient.instance!!.userParams()!!.student.periods
         if (!homeState.isLoading && homeState.home == null && homeState.error == null) {
             homeViewModel.loadHome()
         }
@@ -71,19 +67,23 @@ fun GradesView(
         homeState.error != null -> ErrorView(homeState.error!!)
         homeState.home != null -> {
             val homeGrades = homeState.home!!.grades
-            val period = selected ?: homeGrades.period
-            val isHome = period.id == homeGrades.period.id
-            val fullGrades = state.timetable[period]
+            val period = selected ?: homeGrades.period.id
+            val isHome = selected == homeGrades.period.id
+            val fullGrades = state.grades[period]
 
             // Other periods are loaded in full right away
             LaunchedEffect(period) {
-                if (!isHome && period !in state.timetable && period !in state.loading) {
+                if (!isHome && period !in state.grades && period !in state.loading) {
                     gradesViewModel.loadPeriod(period)
                 }
             }
 
             Column(modifier = Modifier.padding(paddingValues)) {
-                periods?.let { PeriodPicker(it.periods, period) { p -> selected = p } }
+                PeriodPicker(
+                    AppClient.userParams!!.student.periods.periods, period
+                ) { p ->
+                    selected = p
+                }
 
                 when {
                     !isHome && period in state.loading -> LoadingView()
@@ -128,7 +128,7 @@ fun GradesView(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PeriodPicker(periods: List<Period>, selected: Period?, onSelect: (Period) -> Unit) {
+fun PeriodPicker(periods: List<Period>, selected: String?, onSelect: (String) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,8 +137,8 @@ fun PeriodPicker(periods: List<Period>, selected: Period?, onSelect: (Period) ->
     ) {
         periods.forEachIndexed { i, p ->
             ToggleButton(
-                checked = p.id == selected?.id,
-                onCheckedChange = { onSelect(p) },
+                checked = p.id == selected,
+                onCheckedChange = { onSelect(p.id) },
                 modifier = Modifier.weight(1f),
                 shapes = when (i) {
                     0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()

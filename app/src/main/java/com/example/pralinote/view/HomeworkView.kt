@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toColorInt
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -110,8 +111,9 @@ fun HomeworkDay(text: String) {
         modifier = Modifier.padding(
             horizontal = 8.dp,
             vertical = 6.dp,
-        ),
+        ).fillMaxWidth(),
         fontWeight = FontWeight.Bold,
+        textAlign = TextAlign.Center,
         style = MaterialTheme.typography.titleMedium,
     )
 }

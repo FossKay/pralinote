@@ -13,16 +13,16 @@ import uniffi.pronote_rs.Grades
 import uniffi.pronote_rs.Period
 
 data class GradesState(
-    val loading: List<Period> = emptyList(),
-    val timetable: Map<Period, Grades> = emptyMap(),
-    val error: Map<Period, Throwable?> = emptyMap(),
+    val loading: List<String> = emptyList(),
+    val grades: Map<String, Grades> = emptyMap(),
+    val error: Map<String, Throwable?> = emptyMap(),
 )
 
 class GradesModel : ViewModel() {
     private val _grades = MutableStateFlow(GradesState())
     val grades: StateFlow<GradesState> = _grades.asStateFlow()
 
-    fun loadPeriod(period: Period) {
+    fun loadPeriod(period: String) {
         if (period in _grades.value.loading) {
             return
         }
@@ -32,11 +32,14 @@ class GradesModel : ViewModel() {
             }
             try {
                 val client = AppClient.instance!!
+                val periodObject = AppClient.userParams!!.student.periods.periods.first {
+                    it.id == period
+                }
                 val grades = withContext(Dispatchers.IO) {
-                    if (MOCK) client.mockGrades(period) else client.grades(period)
+                    if (MOCK) client.mockGrades(periodObject) else client.grades(periodObject)
                 }
                 _grades.update {
-                    it.copy(timetable = _grades.value.timetable + (period to grades))
+                    it.copy(grades = _grades.value.grades + (period to grades))
                 }
             } catch (e: Throwable) {
                 e.printStackTrace()
