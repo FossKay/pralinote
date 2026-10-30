@@ -18,6 +18,8 @@ import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,9 +54,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            var theme by remember { mutableStateOf<Color?>(null) }
+            var theme by rememberSaveable{ mutableStateOf<Color?>(null) }
             // REMEMBER loggedIn otherwise won't be recomposed!!!
-            var loggedIn by remember { mutableStateOf(false) }
+            // edit: rememberSAVEABLE otherwise could reset login state...
+            var loggedIn by rememberSaveable() { mutableStateOf(false) }
 
             PralinoteTheme(
                 color = theme,
@@ -66,7 +69,12 @@ class MainActivity : ComponentActivity() {
                         loggedIn = AppClient.instance != null
                     })
                 } else {
-                    MainContent()
+                    MainContent(onDisconnection = {
+                        AppClient.instance = null
+                        AppClient.params = null
+                        AppClient.userParams = null
+                        loggedIn = false
+                    })
                 }
             }
         }
@@ -75,8 +83,9 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun MainContent() {
+fun MainContent(onDisconnection: () -> Unit) {
     var page by rememberSaveable { mutableIntStateOf(0) }
+    var dropdownOpen by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
@@ -113,11 +122,27 @@ fun MainContent() {
                 },
                 actions = {
                     IconButton(
-                        onClick = {}
+                        onClick = {
+                            dropdownOpen = true
+                        }
                     ) {
                         Icon(
                             Icons.Outlined.Menu,
-                            contentDescription = "Devoirs"
+                            contentDescription = "Options"
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = dropdownOpen,
+                        onDismissRequest = {
+                            dropdownOpen = false
+                        }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Se déconnecter") },
+                            onClick = {
+                                dropdownOpen = false
+                                onDisconnection()
+                            }
                         )
                     }
                 },
