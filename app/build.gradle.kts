@@ -8,7 +8,6 @@ android {
     compileSdk {
         version = release(37)
     }
-
     defaultConfig {
         applicationId = "com.example.pralinote"
         minSdk = 26
@@ -22,7 +21,6 @@ android {
             abiFilters += listOf("arm64-v8a")
         }
     }
-
     signingConfigs {
         create("release") {
             storeFile = file(project.properties["RELEASE_STORE_FILE"] as String)
@@ -31,7 +29,6 @@ android {
             keyPassword = project.properties["RELEASE_KEY_PASSWORD"] as String
         }
     }
-
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
@@ -44,7 +41,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildTypes {
+        debug {
+            buildConfigField("boolean", "MOCK", "true")
+        }
+        release {
+            buildConfigField("boolean", "MOCK", "false")
+        }
+    }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 }
