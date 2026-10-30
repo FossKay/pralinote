@@ -18,6 +18,7 @@ local.properties
 my-release-key.jks
 /.idea
 /app/pronote-rs/.cargo
+/app/pronote-rs/Cargo.lock
 /app/pronote-rs/target
 /app/pronote-rs/update
 /app/src/main/jniLibs

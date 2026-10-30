@@ -1,7 +1,7 @@
-use crate::communication::Communication;
-use crate::data::*;
 use crate::Client;
 use crate::Error;
+use crate::communication::Communication;
+use crate::data::*;
 
 #[derive(uniffi::Object)]
 pub struct PronoteClient {
@@ -11,15 +11,9 @@ pub struct PronoteClient {
 #[uniffi::export(async_runtime = "tokio")]
 impl PronoteClient {
     #[uniffi::constructor]
-    pub async fn login(
-        url: String,
-        username: String,
-        password: String,
-    ) -> Result<Self, Error> {
+    pub async fn login(url: String, username: String, password: String) -> Result<Self, Error> {
         Ok(Self {
-            c: tokio::sync::Mutex::new(
-                Client::password_login(&url, &username, &password).await?,
-            ),
+            c: tokio::sync::Mutex::new(Client::password_login(&url, &username, &password).await?),
         })
     }
 
@@ -33,28 +27,15 @@ impl PronoteClient {
     ) -> Result<Self, Error> {
         Ok(Self {
             c: tokio::sync::Mutex::new(
-                Client::token_login(
-                    &url,
-                    &username,
-                    &token,
-                    &uuid,
-                    &nav_identifier,
-                )
-                .await?,
+                Client::token_login(&url, &username, &token, &uuid, &nav_identifier).await?,
             ),
         })
     }
 
     #[uniffi::constructor]
-    pub async fn qr_login(
-        qr_code: String,
-        pin: String,
-        uuid: String,
-    ) -> Result<Self, Error> {
+    pub async fn qr_login(qr_code: String, pin: String, uuid: String) -> Result<Self, Error> {
         Ok(Self {
-            c: tokio::sync::Mutex::new(
-                Client::qr_login(&qr_code, &pin, &uuid).await?,
-            ),
+            c: tokio::sync::Mutex::new(Client::qr_login(&qr_code, &pin, &uuid).await?),
         })
     }
 
@@ -102,22 +83,11 @@ impl PronoteClient {
         self.c.lock().await.get_week(&date)
     }
 
-    pub async fn homework(
-        &self,
-        first_week: u8,
-        last_week: u8,
-    ) -> Result<Vec<Homework>, Error> {
-        self.c
-            .lock()
-            .await
-            .homework(first_week, last_week)
-            .await
+    pub async fn homework(&self, first_week: u8, last_week: u8) -> Result<Vec<Homework>, Error> {
+        self.c.lock().await.homework(first_week, last_week).await
     }
 
-    pub async fn timetable(
-        &self,
-        week: u8,
-    ) -> Result<Vec<Vec<Lesson>>, Error> {
+    pub async fn timetable(&self, week: u8) -> Result<Vec<Vec<Lesson>>, Error> {
         self.c.lock().await.timetable(week).await
     }
 
@@ -125,23 +95,12 @@ impl PronoteClient {
         self.c.lock().await.home(&date).await
     }
 
-    pub async fn grades(
-        &self,
-        period: Period,
-    ) -> Result<Grades, Error> {
+    pub async fn grades(&self, period: Period) -> Result<Grades, Error> {
         self.c.lock().await.grades(&period).await
     }
 
-    pub async fn documents(
-        &self,
-        first_week: u8,
-        last_week: u8,
-    ) -> Result<Resources, Error> {
-        self.c
-            .lock()
-            .await
-            .documents(first_week, last_week)
-            .await
+    pub async fn documents(&self, first_week: u8, last_week: u8) -> Result<Resources, Error> {
+        self.c.lock().await.documents(first_week, last_week).await
     }
 
     pub async fn agenda(&self) -> Result<Agenda, Error> {
@@ -159,45 +118,23 @@ impl PronoteClient {
         self.c.lock().await.discussions().await
     }
 
-    pub async fn messages(
-        &self,
-        possessions: Vec<Possession>,
-    ) -> Result<Messages, Error> {
+    pub async fn messages(&self, possessions: Vec<Possession>) -> Result<Messages, Error> {
         self.c.lock().await.messages(&possessions).await
     }
 
-    pub async fn news_item_content(
-        &self,
-        news_item_id: String,
-    ) -> Result<Vec<Question>, Error> {
-        self.c
-            .lock()
-            .await
-            .news_item_content(&news_item_id)
-            .await
+    pub async fn news_item_content(&self, news_item_id: String) -> Result<Vec<Question>, Error> {
+        self.c.lock().await.news_item_content(&news_item_id).await
     }
 
-    pub async fn set_done(
-        &self,
-        homework_id: String,
-        done: bool,
-    ) -> Result<(), Error> {
-        self.c
-            .lock()
-            .await
-            .set_done(&homework_id, done)
-            .await
+    pub async fn set_done(&self, homework_id: String, done: bool) -> Result<(), Error> {
+        self.c.lock().await.set_done(&homework_id, done).await
     }
 
     pub async fn staff(&self) -> Result<Vec<StaffTeacher>, Error> {
         self.c.lock().await.staff().await
     }
 
-    pub async fn geolocation(
-        &self,
-        lat: f64,
-        long: f64,
-    ) -> Result<Vec<School>, Error> {
+    pub async fn geolocation(&self, lat: f64, long: f64) -> Result<Vec<School>, Error> {
         Client::geolocation(lat, long).await
     }
 
@@ -213,17 +150,11 @@ impl PronoteClient {
         Client::mock_homework().await
     }
 
-    pub async fn mock_timetable(
-        &self,
-        _week: u8,
-    ) -> Result<Vec<Vec<Lesson>>, Error> {
+    pub async fn mock_timetable(&self, _week: u8) -> Result<Vec<Vec<Lesson>>, Error> {
         Client::mock_timetable(&Client::mock_params().await?).await
     }
 
-    pub async fn mock_grades(
-        &self,
-        period: Period,
-    ) -> Result<Grades, Error> {
+    pub async fn mock_grades(&self, period: Period) -> Result<Grades, Error> {
         Client::mock_grades(&period).await
     }
 
@@ -247,10 +178,7 @@ impl PronoteClient {
         Client::mock_discussions().await
     }
 
-    pub async fn mock_messages(
-        &self,
-        _possessions: Vec<Possession>,
-    ) -> Result<Messages, Error> {
+    pub async fn mock_messages(&self, _possessions: Vec<Possession>) -> Result<Messages, Error> {
         Client::mock_messages().await
     }
 
@@ -261,11 +189,7 @@ impl PronoteClient {
         Client::mock_news_item_content().await
     }
 
-    pub async fn mock_set_done(
-        &self,
-        _homework_id: String,
-        _done: bool,
-    ) -> Result<(), Error> {
+    pub async fn mock_set_done(&self, _homework_id: String, _done: bool) -> Result<(), Error> {
         // do nothing
         Ok(())
     }

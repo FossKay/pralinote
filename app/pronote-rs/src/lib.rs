@@ -21,7 +21,6 @@ pub enum Error {
     InvalidAction,
     ConnectionFailed,
     Pronote { code: i64, details: String },
-    InvalidResponse,
 }
 
 impl std::fmt::Display for Error {
@@ -37,8 +36,6 @@ impl std::fmt::Display for Error {
             Self::Pronote { code, details } => {
                 write!(f, "Pronote error {code}: {details}")
             }
-            Self::InvalidResponse => write!(f, "Invalid response"),
         }
     }
 }
-
