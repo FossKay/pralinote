@@ -28,7 +28,6 @@ import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +51,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -65,11 +65,10 @@ import com.example.pralinote.model.AppClient
 import com.example.pralinote.model.MOCK
 import com.example.pralinote.storage.Credentials
 import com.example.pralinote.storage.CredentialsStore
+import com.example.pralinote.ui.theme.PralinoteTheme
 import com.example.pralinote.ui.theme.PrimaryHex
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import uniffi.pronote_rs.PronoteClient
-import kotlin.time.Duration.Companion.milliseconds
 import uniffi.pronote_rs.Exception as PronoteException
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -268,87 +267,91 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(profiles, key = { it.id }) { profile ->
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(
-                                    topStart = 8.dp,
-                                    bottomStart = 8.dp,
-                                    topEnd = 12.dp,
-                                    bottomEnd = 12.dp,
-                                )
+                            PralinoteTheme(
+                                color = Color((profile.color ?: PrimaryHex).toColorInt()),
                             ) {
-                                Row(
+                                Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(IntrinsicSize.Min),
-                                    verticalAlignment = Alignment.CenterVertically // the options icon
+                                        .clip(
+                                            RoundedCornerShape(
+                                                topStart = 8.dp,
+                                                bottomStart = 8.dp,
+                                                topEnd = 12.dp,
+                                                bottomEnd = 12.dp,
+                                            )
+                                        )
+                                        .background(MaterialTheme.colorScheme.surfaceContainer)
                                 ) {
-                                    // like in official app, a vertical stripe with the school's color
-                                    Box(
+                                    Row(
                                         modifier = Modifier
-                                            .fillMaxHeight()
-                                            .width(8.dp)
-                                            .background(
-                                                Color(
-                                                    (profile.color ?: PrimaryHex).toColorInt()
-                                                )
-                                            )
-                                    )
-
-                                    // name + school name (+ dirty)
-                                    Column(
-                                        modifier = Modifier
-                                            .weight(1f) // so that the options icon is at top right
-                                            .clickable { connect(profile) }
-                                            .padding(start = 16.dp)
-                                            .padding(vertical = 16.dp)
+                                            .fillMaxWidth()
+                                            .height(IntrinsicSize.Min),
+                                        verticalAlignment = Alignment.CenterVertically // the options icon
                                     ) {
-                                        Text(
-                                            text = profile.studentName,
-                                            fontWeight = FontWeight.Bold,
+                                        // like in official app, a vertical stripe with the school's color
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxHeight()
+                                                .width(8.dp)
+                                                .background(MaterialTheme.colorScheme.primaryContainer)
                                         )
-                                        Text(
-                                            text = profile.schoolName,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                        if (profile.dirty) {
+
+                                        // name + school name (+ dirty)
+                                        Column(
+                                            modifier = Modifier
+                                                .weight(1f) // so that the options icon is at top right
+                                                .clickable { connect(profile) }
+                                                .padding(start = 16.dp)
+                                                .padding(vertical = 16.dp)
+                                        ) {
                                             Text(
-                                                text = "Connexion expirée",
-                                                color = MaterialTheme.colorScheme.error
+                                                text = profile.studentName,
+                                                fontWeight = FontWeight.Bold,
                                             )
-                                        }
-                                    }
-
-                                    // options icon
-                                    Box {
-                                        IconButton(
-                                            onClick = { menuProfileId = profile.id }
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.MoreVert,
-                                                contentDescription = "Options"
+                                            Text(
+                                                text = profile.schoolName,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
-                                        }
-
-                                        DropdownMenu(
-                                            expanded = menuProfileId == profile.id,
-                                            onDismissRequest = {
-                                                menuProfileId = null
+                                            if (profile.dirty) {
+                                                Text(
+                                                    text = "Connexion expirée",
+                                                    color = MaterialTheme.colorScheme.error
+                                                )
                                             }
-                                        ) {
-                                            DropdownMenuItem(
-                                                text = { Text("Supprimer") },
-                                                leadingIcon = {
-                                                    Icon(
-                                                        Icons.Default.Delete,
-                                                        contentDescription = null
-                                                    )
-                                                },
-                                                onClick = {
-                                                    store.delete(profile.id)
-                                                    profiles = store.getAll()
+                                        }
+
+                                        // options icon
+                                        Box {
+                                            IconButton(
+                                                onClick = { menuProfileId = profile.id }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.MoreVert,
+                                                    contentDescription = "Options"
+                                                )
+                                            }
+
+                                            DropdownMenu(
+                                                expanded = menuProfileId == profile.id,
+                                                onDismissRequest = {
+                                                    menuProfileId = null
                                                 }
-                                            )
+                                            ) {
+                                                DropdownMenuItem(
+                                                    text = { Text("Supprimer") },
+                                                    leadingIcon = {
+                                                        Icon(
+                                                            Icons.Default.Delete,
+                                                            contentDescription = null
+                                                        )
+                                                    },
+                                                    onClick = {
+                                                        store.delete(profile.id)
+                                                        profiles = store.getAll()
+                                                    }
+                                                )
+                                            }
                                         }
                                     }
                                 }
