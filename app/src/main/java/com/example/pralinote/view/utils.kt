@@ -33,13 +33,19 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.toColorInt
 import com.example.pralinote.model.AppClient
+import com.example.pralinote.ui.theme.PrimaryHex
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+
+fun getPraliColor(it: String?): Color {
+    return Color((it ?: PrimaryHex).toColorInt())
+}
 
 fun formatTeacher(it: String): String {
     return it.split(" ").dropLast(1).joinToString(" ")

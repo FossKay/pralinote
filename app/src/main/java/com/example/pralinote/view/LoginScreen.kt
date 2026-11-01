@@ -2,6 +2,7 @@ package com.example.pralinote.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,20 +60,18 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.toColorInt
 import com.example.pralinote.model.AppClient
 import com.example.pralinote.model.MOCK
 import com.example.pralinote.storage.Credentials
 import com.example.pralinote.storage.CredentialsStore
 import com.example.pralinote.ui.theme.PralinoteTheme
-import com.example.pralinote.ui.theme.PrimaryHex
 import kotlinx.coroutines.launch
 import uniffi.pronote_rs.PronoteClient
 import uniffi.pronote_rs.Exception as PronoteException
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
+fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
     val context = LocalContext.current
     val store = remember { CredentialsStore(context) }
     val scope = rememberCoroutineScope()
@@ -83,8 +81,6 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
 
     // id of the profile whose creds are loaded (in login screen)
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
-    // if we click on the options icon of a profile
-    var menuProfileId by remember { mutableStateOf<Long?>(null) }
     // dialog that explains URL format
     var showUrlHelp by remember { mutableStateOf(false) }
 
@@ -110,7 +106,7 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
         showForm = true
 
         if (profile != null) {
-            onLoginSuccess(Color((profile.color ?: PrimaryHex).toColorInt()))
+            onLoginSuccess(profile.color)
         }
     }
 
@@ -185,11 +181,7 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
                 showForm = false
                 editingId = null
 
-                onLoginSuccess(
-                    Color(
-                        (client.params().collectivity.color ?: PrimaryHex).toColorInt()
-                    )
-                )
+                onLoginSuccess(client.params().collectivity.color)
             } catch (e: PronoteException) {
                 if (profileId != null) {
                     store.get(profileId)?.let { profile ->
@@ -220,32 +212,25 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
         doLogin()
     }
 
-    Scaffold(
-        topBar = {
-            if (!showForm) {
-                TopAppBar(
-                    title = { Text("Comptes") }
+    Scaffold(topBar = {
+        if (!showForm) {
+            TopAppBar(
+                title = { Text("Comptes") })
+        } else {
+            TopAppBar(
+                title = { Text("Connexion") })
+        }
+    }, floatingActionButton = {
+        if (!showForm) {
+            // TODO: fab menu w/ qr code, pwd, geolocation
+            FloatingActionButton(
+                onClick = { openForm() }) {
+                Icon(
+                    Icons.Filled.Add, contentDescription = "Ajouter un compte"
                 )
-            } else {
-                TopAppBar(
-                    title = { Text("Connexion") }
-                )
-            }
-        },
-        floatingActionButton = {
-            if (!showForm) {
-                // TODO: fab menu w/ qr code, pwd, geolocation
-                FloatingActionButton(
-                    onClick = { openForm() }
-                ) {
-                    Icon(
-                        Icons.Filled.Add,
-                        contentDescription = "Ajouter un compte"
-                    )
-                }
             }
         }
-    ) { padding ->
+    }) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -268,105 +253,25 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
                     ) {
                         items(profiles, key = { it.id }) { profile ->
                             PralinoteTheme(
-                                color = Color((profile.color ?: PrimaryHex).toColorInt()),
+                                color = getPraliColor(profile.color)
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(
-                                            RoundedCornerShape(
-                                                topStart = 8.dp,
-                                                bottomStart = 8.dp,
-                                                topEnd = 12.dp,
-                                                bottomEnd = 12.dp,
-                                            )
-                                        )
-                                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                                ) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(IntrinsicSize.Min),
-                                        verticalAlignment = Alignment.CenterVertically // the options icon
-                                    ) {
-                                        // like in official app, a vertical stripe with the school's color
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxHeight()
-                                                .width(8.dp)
-                                                .background(MaterialTheme.colorScheme.primaryContainer)
-                                        )
-
-                                        // name + school name (+ dirty)
-                                        Column(
-                                            modifier = Modifier
-                                                .weight(1f) // so that the options icon is at top right
-                                                .clickable { connect(profile) }
-                                                .padding(start = 16.dp)
-                                                .padding(vertical = 16.dp)
-                                        ) {
-                                            Text(
-                                                text = profile.studentName,
-                                                fontWeight = FontWeight.Bold,
-                                            )
-                                            Text(
-                                                text = profile.schoolName,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                            if (profile.dirty) {
-                                                Text(
-                                                    text = "Connexion expirée",
-                                                    color = MaterialTheme.colorScheme.error
-                                                )
-                                            }
-                                        }
-
-                                        // options icon
-                                        Box {
-                                            IconButton(
-                                                onClick = { menuProfileId = profile.id }
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.MoreVert,
-                                                    contentDescription = "Options"
-                                                )
-                                            }
-
-                                            DropdownMenu(
-                                                expanded = menuProfileId == profile.id,
-                                                onDismissRequest = {
-                                                    menuProfileId = null
-                                                }
-                                            ) {
-                                                DropdownMenuItem(
-                                                    text = { Text("Supprimer") },
-                                                    leadingIcon = {
-                                                        Icon(
-                                                            Icons.Default.Delete,
-                                                            contentDescription = null
-                                                        )
-                                                    },
-                                                    onClick = {
-                                                        store.delete(profile.id)
-                                                        profiles = store.getAll()
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
+                                Profile(profile, onConnect = {
+                                    connect(profile)
+                                }, onDelete = {
+                                    store.delete(profile.id)
+                                    profiles = store.getAll()
+                                })
                             }
                         }
                     }
                 }
             } else {
                 // idk why but otherwise won't work
-                val supportingText: (@Composable () -> Unit)? =
-                    if (urlError) {
-                        { Text("Lien invalide") }
-                    } else {
-                        null
-                    }
+                val supportingText: (@Composable () -> Unit)? = if (urlError) {
+                    { Text("Lien invalide") }
+                } else {
+                    null
+                }
 
                 OutlinedTextField(
                     value = url,
@@ -379,11 +284,9 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
                     supportingText = supportingText,
                     trailingIcon = {
                         IconButton(
-                            onClick = { showUrlHelp = true }
-                        ) {
+                            onClick = { showUrlHelp = true }) {
                             Icon(
-                                Icons.Outlined.Info,
-                                contentDescription = "Aide"
+                                Icons.Outlined.Info, contentDescription = "Aide"
                             )
                         }
                     },
@@ -420,8 +323,7 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
                     ),
                     trailingIcon = @Composable {
                         IconButton(
-                            onClick = { showPassword = !showPassword }
-                        ) {
+                            onClick = { showPassword = !showPassword }) {
                             Icon(
                                 if (showPassword) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
                                 contentDescription = "Aide"
@@ -433,8 +335,7 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
 
                 error?.let {
                     Text(
-                        text = it,
-                        color = MaterialTheme.colorScheme.error
+                        text = it, color = MaterialTheme.colorScheme.error
                     )
                     Spacer(Modifier.height(8.dp))
                 }
@@ -466,18 +367,101 @@ fun LoginScreen(onLoginSuccess: (Color) -> Unit) {
                 title = { Text("Lien du site") },
                 text = {
                     Text(
-                        "Entrez le lien Pronote de votre établissement sous la forme: " +
-                                "https://XXX.index-education.net/pronote"
+                        "Entrez le lien Pronote de votre établissement sous la forme: " + "https://XXX.index-education.net/pronote"
                     )
                 },
                 confirmButton = {
                     TextButton(
-                        onClick = { showUrlHelp = false }
-                    ) {
+                        onClick = { showUrlHelp = false }) {
                         Text("Fermer")
                     }
                 }
             )
+        }
+    }
+}
+
+@Composable
+fun Profile(profile: Credentials, onConnect: () -> Unit, onDelete: () -> Unit) {
+    var dropdownOpen by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(
+                RoundedCornerShape(
+                    topStart = 8.dp,
+                    bottomStart = 8.dp,
+                    topEnd = 12.dp,
+                    bottomEnd = 12.dp,
+                )
+            )
+            .background(MaterialTheme.colorScheme.surfaceContainer)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically // the options icon
+        ) {
+            // like in official app, a vertical stripe with the school's color
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(8.dp)
+                    .background(
+                        if (isSystemInDarkTheme()) {
+                            MaterialTheme.colorScheme.primaryContainer
+                        } else {
+                            // otherwise it's barely visible
+                            MaterialTheme.colorScheme.primaryFixedDim
+                        }
+                    )
+            )
+
+            // name + school name (+ dirty)
+            Column(
+                modifier = Modifier
+                    .weight(1f) // so that the options icon is at top right
+                    .clickable { onConnect() }
+                    .padding(start = 16.dp)
+                    .padding(vertical = 16.dp)) {
+                Text(
+                    text = profile.studentName,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = profile.schoolName, color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (profile.dirty) {
+                    Text(
+                        text = "Connexion expirée", color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
+            // options icon
+            Box {
+                IconButton(
+                    onClick = { dropdownOpen = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert, contentDescription = "Options"
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = dropdownOpen, onDismissRequest = {
+                        dropdownOpen = false
+                    }) {
+                    DropdownMenuItem(text = { Text("Supprimer") }, leadingIcon = {
+                        Icon(
+                            Icons.Default.Delete, contentDescription = null
+                        )
+                    }, onClick = {
+                        onDelete()
+                    })
+                }
+            }
         }
     }
 }

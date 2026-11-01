@@ -1,7 +1,7 @@
+use uniffi::{Enum, Record};
 use crate::helpers::*;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use uniffi::{Enum, Record};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Enum)]
 pub enum LoginMode {
@@ -545,7 +545,7 @@ pub struct HomeAttachment {
 #[derive(Debug, Clone, Deserialize, Record)]
 pub struct HomeGrades {
     pub grades: Vec<Grade>,
-    pub period: Period,
+    pub period: Option<Period>,
 }
 
 #[derive(Debug, Clone, Deserialize, Record)]

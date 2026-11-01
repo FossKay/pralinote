@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Assignment
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Menu
@@ -32,12 +33,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
@@ -48,19 +47,20 @@ import com.example.pralinote.view.GradesView
 import com.example.pralinote.view.HomeHomeworkView
 import com.example.pralinote.view.HomeTimetableView
 import com.example.pralinote.view.LoginScreen
+import com.example.pralinote.view.getPraliColor
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            var theme by rememberSaveable{ mutableStateOf<Color?>(null) }
+            var theme by rememberSaveable { mutableStateOf<String?>(null) }
             // REMEMBER loggedIn otherwise won't be recomposed!!!
             // edit: rememberSAVEABLE otherwise could reset login state...
-            var loggedIn by rememberSaveable() { mutableStateOf(false) }
+            var loggedIn by rememberSaveable { mutableStateOf(false) }
 
             PralinoteTheme(
-                color = theme,
+                color = getPraliColor(theme),
             ) {
                 if (!loggedIn) {
                     LoginScreen(onLoginSuccess = { themeColor ->
@@ -139,6 +139,12 @@ fun MainContent(onDisconnection: () -> Unit) {
                     ) {
                         DropdownMenuItem(
                             text = { Text("Se déconnecter") },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.AutoMirrored.Outlined.Logout,
+                                    contentDescription = "Se déconnecter",
+                                )
+                            },
                             onClick = {
                                 dropdownOpen = false
                                 onDisconnection()
