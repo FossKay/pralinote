@@ -67,13 +67,13 @@ fun GradesView(
         homeState.error != null -> ErrorView(homeState.error!!)
         homeState.home != null -> {
             val homeGrades = homeState.home!!.grades
-            val period = selected ?: homeGrades.period.id
-            val isHome = selected == homeGrades.period.id
+            val period = selected ?: homeGrades.period?.id
+            val isHome = selected == homeGrades.period?.id
             val fullGrades = state.grades[period]
 
             // Other periods are loaded in full right away
             LaunchedEffect(period) {
-                if (!isHome && period !in state.grades && period !in state.loading) {
+                if (period != null && !isHome && period !in state.grades && period !in state.loading) {
                     gradesViewModel.loadPeriod(period)
                 }
             }
@@ -107,12 +107,14 @@ fun GradesView(
                                     state.error[period] != null -> ErrorView(state.error[period]!!)
                                     fullGrades != null -> {}
                                     else -> {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.Center,
-                                        ) {
-                                            Button(onClick = { gradesViewModel.loadPeriod(period) }) {
-                                                Text("Voir plus")
+                                        if (period != null) {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.Center,
+                                            ) {
+                                                Button(onClick = { gradesViewModel.loadPeriod(period) }) {
+                                                    Text("Voir plus")
+                                                }
                                             }
                                         }
                                     }

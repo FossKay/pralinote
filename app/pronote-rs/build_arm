@@ -3,19 +3,21 @@ set -e
 
 unset RUSTFLAGS
 
+cd "$PRALINOTE/app/pronote-rs"
+
 cargo install cargo-ndk
 rustup target add aarch64-linux-android
 
-rm -rf ../src/main/jniLibs/arm64-v8a
-mkdir -p ../src/main/jniLibs/arm64-v8a
+rm -rf "$PRALINOTE/app/src/main/jniLibs/arm64-v8a"
+mkdir -p "$PRALINOTE/app/src/main/jniLibs/arm64-v8a"
 
 # arm64-v8a: smartphones 2015- ig
 cargo ndk \
     -t arm64-v8a \
-    -o ../src/main/jniLibs \
+    -o "$PRALINOTE/app/src/main/jniLibs" \
     build --release
 
 cargo run --release --bin uniffi-bindgen -- generate \
-    --library target/aarch64-linux-android/release/libpronote_rs.so \
+    --library "$PRALINOTE/app/pronote-rs/target/aarch64-linux-android/release/libpronote_rs.so" \
     --language kotlin \
-    --out-dir ../src/main/java
+    --out-dir "$PRALINOTE/app/src/main/java"

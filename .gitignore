@@ -20,7 +20,6 @@ my-release-key.jks
 /app/pronote-rs/.cargo
 /app/pronote-rs/Cargo.lock
 /app/pronote-rs/target
-/app/pronote-rs/update
 /app/src/main/jniLibs
 /app/build
 /app/src/main/java/uniffi/pronote_rs
