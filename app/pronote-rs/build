@@ -1,27 +1,27 @@
 #!/usr/bin/env bash
 set -e
 
-# I have export RUSTFLAGS='-C target-cpu=native'
+# I have export RUSTFLAGS='-C target-cpu=native' in my zshrc
 unset RUSTFLAGS
 
-cd "$PRALINOTE/app/pronote-rs"
+cd "$(dirname "$0")"
 
 cargo install cargo-ndk
 rustup target add aarch64-linux-android x86_64-linux-android
 
 # Remove previous generated .so
-rm -rf "$PRALINOTE/app/src/main/jniLibs"
-mkdir -p "$PRALINOTE/app/src/main/jniLibs"
+rm -rf ../src/main/jniLibs
+mkdir -p ../src/main/jniLibs
 
 # Build x86_64 and arm .so
 cargo ndk \
     -t arm64-v8a \
     -t x86_64 \
-    -o "$PRALINOTE/app/src/main/jniLibs" \
+    -o ../src/main/jniLibs \
     build --release
 
 # Generated kt code is architecture-independent
 cargo run --release --bin uniffi-bindgen -- generate \
-    --library "$PRALINOTE/app/pronote-rs/target/aarch64-linux-android/release/libpronote_rs.so" \
+    --library target/aarch64-linux-android/release/libpronote_rs.so \
     --language kotlin \
-    --out-dir "$PRALINOTE/app/src/main/java"
+    --out-dir ../src/main/java

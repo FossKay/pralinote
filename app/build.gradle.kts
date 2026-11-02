@@ -1,3 +1,14 @@
+// should be the right way to do it
+val buildPronoteRS = tasks.register<Exec>("buildPronoteRS") {
+    description = "Builds the UniFFI pronote-rs kt bindings"
+    workingDir = rootProject.projectDir
+    commandLine("${rootProject.projectDir}/app/pronote-rs/build")
+}
+
+tasks.named("preBuild") {
+    dependsOn(buildPronoteRS)
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)

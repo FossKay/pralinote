@@ -5,7 +5,7 @@ import shutil
 import os
 
 A = Path(os.getenv("PRONOTE_RS")) / "src"
-B = Path(os.getenv("PRALINOTE")) / "app/pronote-rs/src"
+B = Path(__file__).resolve().parent / "src"
 
 files = ["client.rs", "helpers.rs", "communication.rs", "data.rs", "encryption.rs"]
 
