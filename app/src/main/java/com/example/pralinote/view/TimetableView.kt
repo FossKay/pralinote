@@ -56,10 +56,6 @@ import uniffi.pronote_rs.Lesson
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-fun getPrettyTime(time: String): String {
-    return time.split(" ")[1].split(":").take(2).joinToString("h").removeSuffix("00")
-}
-
 @Composable
 fun Class(lesson: Lesson, showEnd: Boolean) {
     Box(
@@ -123,11 +119,7 @@ fun Class(lesson: Lesson, showEnd: Boolean) {
                     )
                     Row(
                         modifier = Modifier
-                            .clip(
-                                RoundedCornerShape(
-                                    8.dp
-                                )
-                            )
+                            .clip(RoundedCornerShape(8.dp))
                             .height(IntrinsicSize.Min)
                             .alpha(if (lesson.cancelled) 0.5f else 1f)
                             .background(
@@ -138,7 +130,6 @@ fun Class(lesson: Lesson, showEnd: Boolean) {
                                     )
                                 )
                             )
-                        //.background(MaterialTheme.colorScheme.surfaceContainer)
                     ) {
                         Box(
                             modifier = Modifier
@@ -168,23 +159,6 @@ fun Class(lesson: Lesson, showEnd: Boolean) {
                                     .joinToString(", ") + "\n" + lesson.note).trim(),
                                 style = MaterialTheme.typography.bodyMedium,
                             )
-                            /*if (lesson.note.isNotEmpty()) {
-                                Spacer(modifier = Modifier.padding(top = 4.dp))
-                                /*Box(
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(MaterialTheme.colorScheme.surfaceContainer)
-                                ) {*/
-                                    Text(
-                                        /*modifier = Modifier.padding(
-                                            horizontal = 8.dp,
-                                            vertical = 4.dp,
-                                        ),*/
-                                        text = lesson.note,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                    )
-                                //}
-                            }*/
                             if (lesson.status.isNotEmpty()) {
                                 Spacer(modifier = Modifier.padding(top = 4.dp))
                                 Box(
@@ -224,7 +198,6 @@ fun HomeTimetableView(
     val scope = rememberCoroutineScope()
 
     var selectedDate by rememberSaveable { mutableStateOf<String?>(null) }
-    var selectedWeek by rememberSaveable { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
         if (!homeState.isLoading && homeState.home == null && homeState.error == null) {
@@ -236,10 +209,9 @@ fun HomeTimetableView(
         val home = homeState.home ?: return@LaunchedEffect
 
         if (selectedDate == null) {
+            val now = LocalDateTime.now()
             selectedDate = when {
-                home.nextDate == null -> home.date
-                LocalDateTime.now().hour > 12 ||
-                        toWorkDate(LocalDate.now()) != LocalDate.now() -> home.nextDate
+                now.hour > 12 && home.nextDate != null -> home.nextDate!!
                 else -> home.date
             }
         }
@@ -256,8 +228,6 @@ fun HomeTimetableView(
         val date = getDate(dateString)
         val week = getWeek(date)
 
-        selectedWeek = week.toInt()
-
         if (
             week !in timetableState.timetable &&
             week !in timetableState.loading &&
@@ -272,14 +242,13 @@ fun HomeTimetableView(
             return@LaunchedEffect
         }
 
-        val dateString = selectedDate!!
         val home = homeState.home!!
 
-        if (dateString == home.date || dateString == home.nextDate) {
+        if (selectedDate == home.date || selectedDate == home.nextDate) {
             return@LaunchedEffect
         }
 
-        val date = getDate(dateString)
+        val date = getDate(selectedDate!!)
 
         if (home.events.isEmpty()) {
             return@LaunchedEffect
@@ -287,7 +256,6 @@ fun HomeTimetableView(
 
         val firstDate = getDate(home.events.first().start.split(" ").first())
         val lastDate = getDate(home.events.last().start.split(" ").first())
-
         val fetchAgenda = date !in firstDate..lastDate
 
         if (fetchAgenda && agendaState.agenda == null && agendaState.error == null && !agendaState.isLoading) {
@@ -305,14 +273,12 @@ fun HomeTimetableView(
                         scope.launch {
                             val date = previousWorkDate(localDate)
                             selectedDate = dateToString(date)
-                            selectedWeek = getWeek(date).toInt()
                         }
                     },
                     onNext = {
                         scope.launch {
                             val date = nextWorkDate(localDate)
                             selectedDate = dateToString(date)
-                            selectedWeek = getWeek(date).toInt()
                         }
                     },
                 )
@@ -347,7 +313,7 @@ fun HomeTimetableView(
                     }
 
                     else -> {
-                        val week = selectedWeek!!.toUByte() // u8
+                        val week = getWeek(getDate(selectedDate!!)) // u8
                         val isLoading = week in timetableState.loading
                         val error = timetableState.error[week]
                         val weekLessons = timetableState.timetable[week]

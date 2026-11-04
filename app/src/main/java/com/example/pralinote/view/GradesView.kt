@@ -67,35 +67,36 @@ fun GradesView(
         homeState.error != null -> ErrorView(homeState.error!!)
         homeState.home != null -> {
             val homeGrades = homeState.home!!.grades
-            val period = selected ?: homeGrades.period?.id
-            val isHome = selected == homeGrades.period?.id
-            val fullGrades = state.grades[period]
+            val fullGrades = selected?.let {
+                state.grades[selected]
+            }
 
-            // Other periods are loaded in full right away
-            LaunchedEffect(period) {
-                if (period != null && !isHome && period !in state.grades && period !in state.loading) {
-                    gradesViewModel.loadPeriod(period)
+            // If user selects a period
+            LaunchedEffect(selected) {
+                if (selected != null && selected !in state.grades && selected !in state.loading) {
+                    gradesViewModel.loadPeriod(selected!!)
                 }
             }
 
             Column(modifier = Modifier.padding(paddingValues)) {
                 PeriodPicker(
-                    AppClient.userParams!!.student.periods.periods, period
+                    AppClient.userParams!!.student.periods.periods,
+                    selected ?: homeState.home?.grades?.period?.id
                 ) { p ->
                     selected = p
                 }
 
                 when {
-                    !isHome && period in state.loading -> LoadingView()
-                    !isHome && state.error[period] != null -> ErrorView(state.error[period]!!)
-                    !isHome && fullGrades == null -> LoadingView()
+                    selected in state.loading -> LoadingView()
+                    selected != null && state.error[selected!!] != null -> ErrorView(state.error[selected]!!)
+                    selected != null && fullGrades == null -> LoadingView()
                     else -> GradesList(
                         grades = fullGrades?.grades ?: homeGrades.grades,
                         footer = {
                             // "Voir plus" only on the home period
-                            if (isHome) {
+                            if (fullGrades == null) {
                                 when {
-                                    period in state.loading -> {
+                                    selected in state.loading -> {
                                         Row(
                                             modifier = Modifier.fillMaxWidth(),
                                             horizontalArrangement = Arrangement.Center,
@@ -104,15 +105,15 @@ fun GradesView(
                                         }
                                     }
 
-                                    state.error[period] != null -> ErrorView(state.error[period]!!)
-                                    fullGrades != null -> {}
                                     else -> {
-                                        if (period != null) {
+                                        if (homeState.home!!.grades.period != null) {
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.Center,
                                             ) {
-                                                Button(onClick = { gradesViewModel.loadPeriod(period) }) {
+                                                Button(onClick = {
+                                                    selected = homeState.home!!.grades.period!!.id
+                                                }) {
                                                     Text("Voir plus")
                                                 }
                                             }
@@ -128,7 +129,7 @@ fun GradesView(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+//@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PeriodPicker(periods: List<Period>, selected: String?, onSelect: (String) -> Unit) {
     Row(

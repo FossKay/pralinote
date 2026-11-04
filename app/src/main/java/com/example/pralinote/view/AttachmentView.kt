@@ -32,16 +32,10 @@ fun AttachmentView(
 
     Box(
         modifier = Modifier
-            .padding(
-                top = 6.dp
-            )
+            .padding(top = 6.dp)
             .clip(RoundedCornerShape(8.dp))
-            .background(
-                MaterialTheme.colorScheme.primaryContainer
-            )
-            .clickable {
-                uriHandler.openUri(attachment.link)
-            }
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable { uriHandler.openUri(attachment.link) }
             .padding(
                 top = 4.dp,
                 bottom = 4.dp,

@@ -108,10 +108,12 @@ fun Homework(
 fun HomeworkDay(text: String) {
     Text(
         text,
-        modifier = Modifier.padding(
-            horizontal = 8.dp,
-            vertical = 6.dp,
-        ).fillMaxWidth(),
+        modifier = Modifier
+            .padding(
+                horizontal = 8.dp,
+                vertical = 6.dp,
+            )
+            .fillMaxWidth(),
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
         style = MaterialTheme.typography.titleMedium,

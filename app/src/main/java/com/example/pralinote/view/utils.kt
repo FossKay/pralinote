@@ -43,6 +43,10 @@ import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+fun getPrettyTime(time: String): String {
+    return time.split(" ")[1].split(":").take(2).joinToString("h").removeSuffix("00")
+}
+
 fun getPraliColor(it: String?): Color {
     return Color((it ?: PrimaryHex).toColorInt())
 }
