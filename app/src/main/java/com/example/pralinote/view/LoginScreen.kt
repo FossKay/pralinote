@@ -31,7 +31,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -44,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -69,7 +69,6 @@ import kotlinx.coroutines.launch
 import uniffi.pronote_rs.PronoteClient
 import uniffi.pronote_rs.Exception as PronoteException
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
     val context = LocalContext.current
@@ -77,65 +76,27 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
     val scope = rememberCoroutineScope()
 
     var profiles by remember { mutableStateOf(store.getAll()) }
-    var showForm by rememberSaveable { mutableStateOf(false) }
 
+    var showForm by rememberSaveable { mutableStateOf(false) }
     // id of the profile whose creds are loaded (in login screen)
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
-    // dialog that explains URL format
-    var showUrlHelp by remember { mutableStateOf(false) }
-
-    var url by rememberSaveable { mutableStateOf("") }
-    var user by rememberSaveable { mutableStateOf("") }
-    var pass by rememberSaveable { mutableStateOf("") }
     var isLoading by rememberSaveable { mutableStateOf(false) }
-    var showPassword by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
 
-    val urlRegex = Regex("""^https://[a-zA-Z0-9-]+\.index-education\.net/pronote$""")
-    val urlValid = urlRegex.matches(url.trim())
-    val urlError = url.isNotBlank() && !urlValid
-    val formValid = urlValid && user.isNotBlank() && pass.isNotEmpty()
-
-    fun openForm(profile: Credentials? = null, message: String? = null) {
-        editingId = profile?.id
-        url = profile?.rootUrl.orEmpty()
-        user = profile?.username.orEmpty()
-        pass = profile?.password.orEmpty()
-        error = message
-        showPassword = false
-        showForm = true
-
-        if (profile != null) {
-            onLoginSuccess(profile.color)
-        }
-    }
-
-    fun closeForm() {
-        showForm = false
-        editingId = null
-        error = null
-        profiles = store.getAll()
-    }
-
-    fun doLogin() {
+    fun doLogin(rootUrl: String, user: String, pwd: String, profileId: Long?) {
         // already logging in...
         // doLogin SHOULD set isLoading=true itself
         if (isLoading) return
-
-        val rootUrl = url.trim()
-        val username = user.trim()
-        val password = pass
-        val profileId = editingId
-
         isLoading = true
         error = null
 
         scope.launch {
             try {
                 val client = if (MOCK) {
+                    //delay(3000.milliseconds)
                     PronoteClient.mock()
                 } else {
-                    PronoteClient.login(rootUrl, username, password)
+                    PronoteClient.login(rootUrl.trim(), user.trim(), pwd.trim())
                 }
 
                 AppClient.instance = client
@@ -145,9 +106,9 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
                 if (profileId == null) {
                     store.save(
                         Credentials(
-                            rootUrl = rootUrl,
-                            username = username,
-                            password = password,
+                            rootUrl = rootUrl.trim(),
+                            username = user.trim(),
+                            password = pwd.trim(),
                             navIdentifier = null,
                             uuid = null,
                             schoolName = client.params().schoolName,
@@ -162,9 +123,9 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
                     store.get(profileId)?.let { profile ->
                         store.save(
                             profile.copy(
-                                rootUrl = rootUrl,
-                                username = username,
-                                password = password,
+                                rootUrl = rootUrl.trim(),
+                                username = user.trim(),
+                                password = pwd.trim(),
                                 navIdentifier = null,
                                 uuid = null,
                                 schoolName = client.params().schoolName,
@@ -199,17 +160,12 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
         }
     }
 
-    fun connect(profile: Credentials) {
-        if (isLoading) return
-        isLoading = false
-
-        if (profile.dirty) {
-            openForm(profile, "La connexion à Pronote a expiré.")
-            return
+    LaunchedEffect(editingId) {
+        if (editingId != null && !isLoading) {
+            val profile = profiles.first { it.id == editingId }
+            if (profile.dirty) return@LaunchedEffect
+            doLogin(profile.rootUrl, profile.username, profile.password, profile.id)
         }
-
-        openForm(profile)
-        doLogin()
     }
 
     Scaffold(topBar = {
@@ -224,7 +180,10 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
         if (!showForm) {
             // TODO: fab menu w/ qr code, pwd, geolocation
             FloatingActionButton(
-                onClick = { openForm() }) {
+                onClick = {
+                    editingId = null // we aren't opening an existing profile
+                    showForm = true
+                }) {
                 Icon(
                     Icons.Filled.Add, contentDescription = "Ajouter un compte"
                 )
@@ -256,7 +215,11 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
                                 color = getPraliColor(profile.color)
                             ) {
                                 Profile(profile, onConnect = {
-                                    connect(profile)
+                                    editingId = profile.id
+                                    if (profile.dirty) {
+                                        error = "La connexion à Pronote a expiré."
+                                    }
+                                    showForm = true
                                 }, onDelete = {
                                     store.delete(profile.id)
                                     profiles = store.getAll()
@@ -266,118 +229,42 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
                     }
                 }
             } else {
-                // idk why but otherwise won't work
-                val supportingText: (@Composable () -> Unit)? = if (urlError) {
-                    { Text("Lien invalide") }
-                } else {
-                    null
-                }
-
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = { url = it },
-                    label = { Text("Lien du site") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading,
-                    singleLine = false,
-                    isError = urlError,
-                    supportingText = supportingText,
-                    trailingIcon = {
-                        IconButton(
-                            onClick = { showUrlHelp = true }) {
-                            Icon(
-                                Icons.Outlined.Info, contentDescription = "Aide"
-                            )
+                if (editingId == null) {
+                    LoginView(
+                        "",
+                        "",
+                        "",
+                        isLoading,
+                        error,
+                        { url, user, pwd ->
+                            doLogin(url, user, pwd, null)
+                        },
+                        {
+                            showForm = false
+                            error = null
                         }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Uri
                     )
-                )
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = user,
-                    onValueChange = { user = it },
-                    label = { Text("Identifiant") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading,
-                    singleLine = true
-                )
-                Spacer(Modifier.height(8.dp))
-                val passwordTransform: VisualTransformation = if (!showPassword) {
-                    PasswordVisualTransformation()
                 } else {
-                    VisualTransformation.None
-                }
-                // TODO: handle token auth (don't display token + user can't edit it)
-                OutlinedTextField(
-                    value = pass,
-                    onValueChange = { pass = it },
-                    label = { Text("Mot de passe") },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !isLoading,
-                    singleLine = true,
-                    visualTransformation = passwordTransform,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Password
-                    ),
-                    trailingIcon = @Composable {
-                        IconButton(
-                            onClick = { showPassword = !showPassword }) {
-                            Icon(
-                                if (showPassword) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
-                                contentDescription = "Aide"
-                            )
+                    val profile = profiles.first { it.id == editingId }
+                    LoginView(
+                        profile.rootUrl,
+                        profile.username,
+                        profile.password,
+                        isLoading,
+                        error,
+                        { url, user, pwd ->
+                            doLogin(url, user, pwd, editingId!!)
+                        },
+                        {
+                            editingId = null
+                            showForm = false
+                            error = null
                         }
-                    },
-                )
-                Spacer(Modifier.height(16.dp))
-
-                error?.let {
-                    Text(
-                        text = it, color = MaterialTheme.colorScheme.error
                     )
-                    Spacer(Modifier.height(8.dp))
-                }
-
-                Button(
-                    onClick = { doLogin() },
-                    enabled = !isLoading && formValid,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    if (isLoading) {
-                        LoadingIndicator()
-                    } else {
-                        Text("Se connecter")
-                    }
-                }
-                TextButton(
-                    onClick = { closeForm() },
-                    enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Text("Annuler")
                 }
             }
         }
 
-        if (showUrlHelp) {
-            AlertDialog(
-                onDismissRequest = { showUrlHelp = false },
-                title = { Text("Lien du site") },
-                text = {
-                    Text(
-                        "Entrez le lien Pronote de votre établissement sous la forme: " + "https://XXX.index-education.net/pronote"
-                    )
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = { showUrlHelp = false }) {
-                        Text("Fermer")
-                    }
-                }
-            )
-        }
     }
 }
 
@@ -463,5 +350,143 @@ fun Profile(profile: Credentials, onConnect: () -> Unit, onDelete: () -> Unit) {
                 }
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun LoginView(
+    rootUrl: String,
+    user: String,
+    pwd: String,
+    isLoading: Boolean,
+    error: String?,
+    onLogin: (String, String, String) -> Unit,
+    onClose: () -> Unit,
+) {
+    // dialog that explains URL format
+    var showUrlHelp by remember { mutableStateOf(false) }
+
+    var url by rememberSaveable { mutableStateOf(rootUrl) }
+    var user by rememberSaveable { mutableStateOf(user) }
+    var pass by rememberSaveable { mutableStateOf(pwd) }
+    var showPassword by rememberSaveable { mutableStateOf(false) }
+
+    val urlRegex = Regex("""^https://[a-zA-Z0-9-]+\.index-education\.net/pronote$""")
+    val urlValid = urlRegex.matches(url.trim())
+    val urlError = url.isNotBlank() && !urlValid
+    val formValid = urlValid && user.isNotBlank() && pass.isNotEmpty()
+
+    // idk why but otherwise won't work
+    val supportingText: (@Composable () -> Unit)? = if (urlError) {
+        { Text("Lien invalide") }
+    } else {
+        null
+    }
+
+    OutlinedTextField(
+        value = url,
+        onValueChange = { url = it },
+        label = { Text("Lien du site") },
+        modifier = Modifier.fillMaxWidth(),
+        enabled = !isLoading,
+        singleLine = false,
+        isError = urlError,
+        supportingText = supportingText,
+        trailingIcon = {
+            IconButton(
+                onClick = { showUrlHelp = true }) {
+                Icon(
+                    Icons.Outlined.Info, contentDescription = "Aide"
+                )
+            }
+        },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Uri
+        )
+    )
+    Spacer(Modifier.height(8.dp))
+    OutlinedTextField(
+        value = user,
+        onValueChange = { user = it },
+        label = { Text("Identifiant") },
+        modifier = Modifier.fillMaxWidth(),
+        enabled = !isLoading,
+        singleLine = true
+    )
+    Spacer(Modifier.height(8.dp))
+    val passwordTransform: VisualTransformation = if (!showPassword) {
+        PasswordVisualTransformation()
+    } else {
+        VisualTransformation.None
+    }
+    // TODO: handle token auth (don't display token + user can't edit it)
+    OutlinedTextField(
+        value = pass,
+        onValueChange = { pass = it },
+        label = { Text("Mot de passe") },
+        modifier = Modifier.fillMaxWidth(),
+        enabled = !isLoading,
+        singleLine = true,
+        visualTransformation = passwordTransform,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password
+        ),
+        trailingIcon = @Composable {
+            IconButton(
+                onClick = { showPassword = !showPassword }) {
+                Icon(
+                    if (showPassword) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                    contentDescription = "Aide"
+                )
+            }
+        },
+    )
+    Spacer(Modifier.height(16.dp))
+
+    error?.let {
+        Text(
+            text = it, color = MaterialTheme.colorScheme.error
+        )
+        Spacer(Modifier.height(8.dp))
+    }
+
+    Button(
+        onClick = {
+            onLogin(rootUrl, user, pwd)
+        },
+        enabled = !isLoading && formValid,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        if (isLoading) {
+            LoadingIndicator()
+        } else {
+            Text("Se connecter")
+        }
+    }
+    TextButton(
+        onClick = { onClose() },
+        enabled = !isLoading,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text("Annuler")
+    }
+
+    if (showUrlHelp) {
+        AlertDialog(
+            onDismissRequest = { showUrlHelp = false },
+            title = { Text("Lien du site") },
+            text = {
+                Text(
+                    "Entrez le lien Pronote de votre établissement sous la forme: " + "https://XXX.index-education.net/pronote"
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = { showUrlHelp = false }) {
+                    Text("Fermer")
+                }
+            }
+        )
     }
 }

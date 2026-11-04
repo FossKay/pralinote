@@ -116,7 +116,7 @@ fun HomeworkDay(text: String) {
             .fillMaxWidth(),
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.bodyLarge,
     )
 }
 

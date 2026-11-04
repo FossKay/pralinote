@@ -3,10 +3,8 @@ package com.example.pralinote.view
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -48,7 +46,9 @@ fun AttachmentView(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                modifier = Modifier.padding(end = 2.dp).size(18.dp),
+                modifier = Modifier
+                    .padding(end = 2.dp)
+                    .size(18.dp),
                 imageVector = Icons.Outlined.AttachFile, // TODO: adapt
                 contentDescription = "Pièce jointe",
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,

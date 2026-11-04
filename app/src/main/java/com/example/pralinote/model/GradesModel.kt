@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.pronote_rs.Grades
-import uniffi.pronote_rs.Period
 
 data class GradesState(
     val loading: List<String> = emptyList(),
