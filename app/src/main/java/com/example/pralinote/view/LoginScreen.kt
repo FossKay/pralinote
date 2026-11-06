@@ -160,14 +160,6 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
         }
     }
 
-    LaunchedEffect(editingId) {
-        if (editingId != null && !isLoading) {
-            val profile = profiles.first { it.id == editingId }
-            if (profile.dirty) return@LaunchedEffect
-            doLogin(profile.rootUrl, profile.username, profile.password, profile.id)
-        }
-    }
-
     Scaffold(topBar = {
         if (!showForm) {
             TopAppBar(
@@ -246,6 +238,9 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
                     )
                 } else {
                     val profile = profiles.first { it.id == editingId }
+                    if (!isLoading && !profile.dirty) {
+                        doLogin(profile.rootUrl, profile.username, profile.password, profile.id)
+                    }
                     LoginView(
                         profile.rootUrl,
                         profile.username,

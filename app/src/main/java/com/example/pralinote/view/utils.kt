@@ -37,6 +37,7 @@ import androidx.core.graphics.toColorInt
 import com.example.pralinote.model.AppClient
 import com.example.pralinote.ui.theme.PrimaryHex
 import kotlinx.coroutines.launch
+import uniffi.pronote_rs.GradeValue
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Month
@@ -45,6 +46,20 @@ import java.time.temporal.ChronoUnit
 
 fun getPrettyTime(time: String): String {
     return time.split(" ")[1].split(":").take(2).joinToString("h").removeSuffix("00")
+}
+
+fun gradeToText(grade: GradeValue): String = when (grade) {
+    is GradeValue.Value -> grade.v1.toString().removeSuffix(".0").replace(".", ",")
+    GradeValue.Absent -> "Absent"
+    GradeValue.Excused -> "Excusé"
+    GradeValue.NotGraded -> "Pas noté"
+    GradeValue.Unfit -> "Inapte"
+    GradeValue.NotHandedIn -> "Non remis"
+    GradeValue.AbsentZero -> "Absent (0/20)"
+    GradeValue.NotHandedInZero -> "Non remis (0/20)"
+    GradeValue.Congratulations -> "Félicitations"
+    GradeValue.Empty -> ""
+    GradeValue.Exception -> "Erreur" // GradeValue::Error in original code :/
 }
 
 fun getPraliColor(it: String?): Color {
