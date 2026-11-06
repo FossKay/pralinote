@@ -5,7 +5,9 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import androidx.core.database.getStringOrNull
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class Credentials(
     val id: Long = 0,
     val rootUrl: String,

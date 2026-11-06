@@ -12,6 +12,7 @@ tasks.named("preBuild") {
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization) // or else won't work
 }
 
 android {
@@ -77,7 +78,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
+    //androidTestImplementation(platform(libs.androidx.compose.bom)) seems unnecessary
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
@@ -88,4 +89,6 @@ dependencies {
     //implementation(libs.icons.lucide.android) sorry lucide but its material time
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation("net.java.dev.jna:jna:5.19.1@aar") // DO NOT TOUCH
+    implementation(libs.navigation3.runtime)
+    implementation(libs.navigation3.ui)
 }

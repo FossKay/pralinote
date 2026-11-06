@@ -41,6 +41,12 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import com.example.pralinote.model.AppClient
 import com.example.pralinote.ui.theme.PralinoteTheme
 import com.example.pralinote.view.GradesView
@@ -48,34 +54,60 @@ import com.example.pralinote.view.HomeHomeworkView
 import com.example.pralinote.view.HomeTimetableView
 import com.example.pralinote.view.LoginScreen
 import com.example.pralinote.view.getPraliColor
+import kotlinx.serialization.Serializable
+import com.example.pralinote.model.ThemeModel
+
+@Serializable
+data object Accounts : NavKey
+
+// TODO: separate accounts view AND model
+// too much pain, seems very difficult to pass state between Accounts and Login
+//@Serializable
+//data class Login(val credentials: Credentials? = null) : NavKey
+
+@Serializable
+data object Content : NavKey
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            var theme by rememberSaveable { mutableStateOf<String?>(null) }
-            // REMEMBER loggedIn otherwise won't be recomposed!!!
-            // edit: rememberSAVEABLE otherwise could reset login state...
-            var loggedIn by rememberSaveable { mutableStateOf(false) }
+            val themeModel: ThemeModel = viewModel()
+            val themeState by themeModel.state.collectAsStateWithLifecycle()
+            val backStack = rememberNavBackStack(Accounts)
 
             PralinoteTheme(
-                color = getPraliColor(theme),
+                color = themeState.color,
             ) {
-                if (!loggedIn) {
-                    LoginScreen(onLoginSuccess = { themeColor ->
-                        theme = themeColor
-                        // smth changed, check login state -> recomposition
-                        loggedIn = AppClient.instance != null
-                    })
-                } else {
-                    MainContent(onDisconnection = {
-                        AppClient.instance = null
-                        AppClient.params = null
-                        AppClient.userParams = null
-                        loggedIn = false
-                    })
-                }
+                NavDisplay(
+                    backStack = backStack,
+                    onBack = { backStack.removeLastOrNull() },
+                    entryProvider = entryProvider {
+                        entry<Content> {
+                            MainContent(onDisconnection = {
+                                AppClient.instance = null
+                                AppClient.params = null
+                                AppClient.userParams = null
+                                // cannot go back, pops to accounts
+                                backStack.clear()
+                                backStack.add(Accounts)
+                            })
+                        }
+
+                        entry<Accounts> {
+                            LoginScreen(onLogin = {
+                                // cannot go back, pops to content
+                                backStack.clear()
+                                backStack.add(Content)
+                            })
+                        }
+
+                        /* entry<Login> {
+                            // inside LoginScreen
+                        } */
+                    }
+                )
             }
         }
     }

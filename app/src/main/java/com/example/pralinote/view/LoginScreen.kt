@@ -24,8 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -43,125 +43,37 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.pralinote.model.AppClient
-import com.example.pralinote.model.MOCK
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.pralinote.model.LoginModel
+import com.example.pralinote.model.ThemeModel
 import com.example.pralinote.storage.Credentials
-import com.example.pralinote.storage.CredentialsStore
 import com.example.pralinote.ui.theme.PralinoteTheme
-import kotlinx.coroutines.launch
-import uniffi.pronote_rs.PronoteClient
-import uniffi.pronote_rs.Exception as PronoteException
 
 @Composable
-fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
-    val context = LocalContext.current
-    val store = remember { CredentialsStore(context) }
-    val scope = rememberCoroutineScope()
-
-    var profiles by remember { mutableStateOf(store.getAll()) }
-
-    var showForm by rememberSaveable { mutableStateOf(false) }
-    // id of the profile whose creds are loaded (in login screen)
-    var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
-    var isLoading by rememberSaveable { mutableStateOf(false) }
-    var error by rememberSaveable { mutableStateOf<String?>(null) }
-
-    fun doLogin(rootUrl: String, user: String, pwd: String, profileId: Long?) {
-        // already logging in...
-        // doLogin SHOULD set isLoading=true itself
-        if (isLoading) return
-        isLoading = true
-        error = null
-
-        scope.launch {
-            try {
-                val client = if (MOCK) {
-                    //delay(3000.milliseconds)
-                    PronoteClient.mock()
-                } else {
-                    PronoteClient.login(rootUrl.trim(), user.trim(), pwd.trim())
-                }
-
-                AppClient.instance = client
-                AppClient.params = client.params()
-                AppClient.userParams = client.userParams()
-
-                if (profileId == null) {
-                    store.save(
-                        Credentials(
-                            rootUrl = rootUrl.trim(),
-                            username = user.trim(),
-                            password = pwd.trim(),
-                            navIdentifier = null,
-                            uuid = null,
-                            schoolName = client.params().schoolName,
-                            studentName = client.userParams()!!.student.person.name,
-                            color = client.params().collectivity.color,
-                            isToken = false,
-                            dirty = false,
-                            autoconnect = false
-                        )
-                    )
-                } else {
-                    store.get(profileId)?.let { profile ->
-                        store.save(
-                            profile.copy(
-                                rootUrl = rootUrl.trim(),
-                                username = user.trim(),
-                                password = pwd.trim(),
-                                navIdentifier = null,
-                                uuid = null,
-                                schoolName = client.params().schoolName,
-                                studentName = client.userParams()!!.student.person.name,
-                                color = client.params().collectivity.color,
-                                isToken = false,
-                                dirty = false
-                            )
-                        )
-                    }
-                }
-
-                profiles = store.getAll()
-                showForm = false
-                editingId = null
-
-                onLoginSuccess(client.params().collectivity.color)
-            } catch (e: PronoteException) {
-                if (profileId != null) {
-                    store.get(profileId)?.let { profile ->
-                        // connection expired -> do not autoconnect
-                        store.save(profile.copy(dirty = true, autoconnect = false))
-                    }
-                    profiles = store.getAll()
-                }
-
-                e.printStackTrace()
-                error = "La connexion a échoué: $e"
-            } finally {
-                isLoading = false
-            }
-        }
-    }
+fun LoginScreen(
+    onLogin: () -> Unit,
+    themeModel: ThemeModel = viewModel(),
+    loginModel: LoginModel = viewModel(),
+) {
+    val loginState by loginModel.state.collectAsStateWithLifecycle()
 
     Scaffold(topBar = {
-        if (!showForm) {
+        if (!loginState.showForm) {
             TopAppBar(
                 title = { Text("Comptes") })
         } else {
@@ -169,12 +81,11 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
                 title = { Text("Connexion") })
         }
     }, floatingActionButton = {
-        if (!showForm) {
+        if (!loginState.showForm) {
             // TODO: fab menu w/ qr code, pwd, geolocation
             FloatingActionButton(
                 onClick = {
-                    editingId = null // we aren't opening an existing profile
-                    showForm = true
+                    loginModel.newProfile()
                 }) {
                 Icon(
                     Icons.Filled.Add, contentDescription = "Ajouter un compte"
@@ -188,8 +99,8 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
                 .padding(padding)
                 .padding(horizontal = 24.dp)
         ) {
-            if (!showForm) {
-                if (profiles.isEmpty()) {
+            if (!loginState.showForm) {
+                if (loginState.profiles.isEmpty()) {
                     Text(
                         "Aucun compte enregistré",
                         textAlign = TextAlign.Center,
@@ -202,64 +113,26 @@ fun LoginScreen(onLoginSuccess: (String?) -> Unit) {
                         contentPadding = PaddingValues(vertical = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(profiles, key = { it.id }) { profile ->
+                        items(loginState.profiles, key = { it.id }) { profile ->
                             PralinoteTheme(
                                 color = getPraliColor(profile.color)
                             ) {
                                 Profile(profile, onConnect = {
-                                    editingId = profile.id
-                                    if (profile.dirty) {
-                                        error = "La connexion à Pronote a expiré."
+                                    loginModel.openProfile(profile) {
+                                        themeModel.setColor(it)
+                                        onLogin()
                                     }
-                                    showForm = true
                                 }, onDelete = {
-                                    store.delete(profile.id)
-                                    profiles = store.getAll()
+                                    loginModel.deleteProfile(profile.id)
                                 })
                             }
                         }
                     }
                 }
             } else {
-                if (editingId == null) {
-                    LoginView(
-                        "",
-                        "",
-                        "",
-                        isLoading,
-                        error,
-                        { url, user, pwd ->
-                            doLogin(url, user, pwd, null)
-                        },
-                        {
-                            showForm = false
-                            error = null
-                        }
-                    )
-                } else {
-                    val profile = profiles.first { it.id == editingId }
-                    if (!isLoading && !profile.dirty) {
-                        doLogin(profile.rootUrl, profile.username, profile.password, profile.id)
-                    }
-                    LoginView(
-                        profile.rootUrl,
-                        profile.username,
-                        profile.password,
-                        isLoading,
-                        error,
-                        { url, user, pwd ->
-                            doLogin(url, user, pwd, editingId!!)
-                        },
-                        {
-                            editingId = null
-                            showForm = false
-                            error = null
-                        }
-                    )
-                }
+                LoginView(onLogin)
             }
         }
-
     }
 }
 
@@ -351,21 +224,29 @@ fun Profile(profile: Credentials, onConnect: () -> Unit, onDelete: () -> Unit) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoginView(
-    rootUrl: String,
-    user: String,
-    pwd: String,
-    isLoading: Boolean,
-    error: String?,
-    onLogin: (String, String, String) -> Unit,
-    onClose: () -> Unit,
+    onLogin: () -> Unit,
+    themeModel: ThemeModel = viewModel(),
+    loginModel: LoginModel = viewModel()
 ) {
-    // dialog that explains URL format
+    val state by loginModel.state.collectAsStateWithLifecycle()
+
+    val profile = state.profiles.find { it.id == state.editingId }
+
+    var url by rememberSaveable(state.editingId) {
+        mutableStateOf(profile?.rootUrl ?: "")
+    }
+    var user by rememberSaveable(state.editingId) {
+        mutableStateOf(profile?.username ?: "")
+    }
+    var pass by rememberSaveable(state.editingId) {
+        mutableStateOf(profile?.password ?: "")
+    }
+
+    var showPassword by remember { mutableStateOf(false) }
     var showUrlHelp by remember { mutableStateOf(false) }
 
-    var url by rememberSaveable { mutableStateOf(rootUrl) }
-    var user by rememberSaveable { mutableStateOf(user) }
-    var pass by rememberSaveable { mutableStateOf(pwd) }
-    var showPassword by rememberSaveable { mutableStateOf(false) }
+    val isLoading = state.isLoading
+    val error = state.error
 
     val urlRegex = Regex("""^https://[a-zA-Z0-9-]+\.index-education\.net/pronote$""")
     val urlValid = urlRegex.matches(url.trim())
@@ -448,7 +329,15 @@ fun LoginView(
 
     Button(
         onClick = {
-            onLogin(rootUrl, user, pwd)
+            loginModel.doLogin(
+                url,
+                user,
+                pass,
+                state.editingId
+            ) {
+                themeModel.setColor(it)
+                onLogin()
+            }
         },
         enabled = !isLoading && formValid,
         modifier = Modifier.fillMaxWidth(),
@@ -460,7 +349,7 @@ fun LoginView(
         }
     }
     TextButton(
-        onClick = { onClose() },
+        onClick = { loginModel.cancel() },
         enabled = !isLoading,
         modifier = Modifier.fillMaxWidth(),
     ) {
