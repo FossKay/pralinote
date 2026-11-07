@@ -175,15 +175,25 @@ fun GradesList(selectedNull: Boolean, grades: List<Grade>, homeGrades: List<Grad
                         .fillMaxWidth()
                         .padding(16.dp),
                     style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
             }
         }
 
         if (homeGrades.isNotEmpty()) {
-            items(homeGrades.reversed()) {
-                GradeView(it)
+            if (grades.isNotEmpty()) {
+                val newHome = homeGrades.map {
+                    grades.firstOrNull { grade ->
+                        grade.id == it.id
+                    } ?: it
+                }
+                items(newHome.reversed()) {
+                    GradeView(it)
+                }
+            } else {
+                items(homeGrades.reversed()) {
+                    GradeView(it)
+                }
             }
         } else if (grades.isNotEmpty()) {
             items(grades.reversed()) {
@@ -194,6 +204,13 @@ fun GradesList(selectedNull: Boolean, grades: List<Grade>, homeGrades: List<Grad
         item { footer() }
 
         if (homeGrades.isNotEmpty() && grades.isNotEmpty()) {
+            val newFull = grades.filter {
+                // could also .all(... != ...)
+                !homeGrades.any({ homeGrade ->
+                    homeGrade.id == it.id
+                })
+            }
+
             item {
                 Text(
                     "Anciennes notes",
@@ -206,7 +223,7 @@ fun GradesList(selectedNull: Boolean, grades: List<Grade>, homeGrades: List<Grad
                 )
             }
 
-            items(grades.reversed()) {
+            items(newFull.reversed()) {
                 GradeView(it)
             }
         }

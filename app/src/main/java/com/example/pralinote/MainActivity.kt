@@ -5,11 +5,14 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -51,6 +54,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import com.example.pralinote.model.AppClient
+import com.example.pralinote.model.LoginModel
 import com.example.pralinote.ui.theme.PralinoteTheme
 import com.example.pralinote.view.GradesView
 import com.example.pralinote.view.HomeHomeworkView
@@ -76,6 +80,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val themeModel: ThemeModel = viewModel()
+            // val loginModel: LoginModel = viewModel()
             val themeState by themeModel.state.collectAsStateWithLifecycle()
             val backStack = rememberNavBackStack(Accounts)
 
@@ -83,15 +88,20 @@ class MainActivity : ComponentActivity() {
                 color = themeState.color,
             ) {
                 NavDisplay(
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                     backStack = backStack,
                     onBack = { backStack.removeLastOrNull() },
                     transitionSpec = {
                         slideInHorizontally { it } togetherWith
-                                slideOutHorizontally { -it }
+                            slideOutHorizontally { -it }
                     },
                     popTransitionSpec = {
-                        slideInHorizontally { -it } togetherWith
-                                slideOutHorizontally { it }
+                        slideInHorizontally(
+                            //animationSpec = tween(5000)
+                        ) { it } togetherWith
+                                slideOutHorizontally(
+                                    //animationSpec = tween(5000)
+                                ) { -it }
                     },
                     entryProvider = entryProvider {
                         entry<Content> {
@@ -100,8 +110,9 @@ class MainActivity : ComponentActivity() {
                                 AppClient.params = null
                                 AppClient.userParams = null
                                 // cannot go back, pops to accounts
-                                backStack.clear()
-                                backStack.add(Accounts)
+                                // don't lazy cancel form
+                                // loginModel.cancel()
+                                backStack.removeLastOrNull() // removeLast = newer func
                             })
                         }
 
@@ -124,6 +135,10 @@ class MainActivity : ComponentActivity() {
 fun MainContent(onDisconnection: () -> Unit) {
     var page by rememberSaveable { mutableIntStateOf(0) }
     var dropdownOpen by rememberSaveable { mutableStateOf(false) }
+
+    BackHandler {
+        onDisconnection()
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.surface,
