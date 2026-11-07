@@ -6,6 +6,9 @@ import android.os.Bundle
 import android.util.Base64
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,14 +59,13 @@ import com.example.pralinote.view.LoginScreen
 import com.example.pralinote.view.getPraliColor
 import kotlinx.serialization.Serializable
 import com.example.pralinote.model.ThemeModel
+import com.example.pralinote.view.LoginView
 
 @Serializable
 data object Accounts : NavKey
 
-// TODO: separate accounts view AND model
-// too much pain, seems very difficult to pass state between Accounts and Login
-//@Serializable
-//data class Login(val credentials: Credentials? = null) : NavKey
+@Serializable
+data object Login : NavKey
 
 @Serializable
 data object Content : NavKey
@@ -83,6 +85,14 @@ class MainActivity : ComponentActivity() {
                 NavDisplay(
                     backStack = backStack,
                     onBack = { backStack.removeLastOrNull() },
+                    transitionSpec = {
+                        slideInHorizontally { it } togetherWith
+                                slideOutHorizontally { -it }
+                    },
+                    popTransitionSpec = {
+                        slideInHorizontally { -it } togetherWith
+                                slideOutHorizontally { it }
+                    },
                     entryProvider = entryProvider {
                         entry<Content> {
                             MainContent(onDisconnection = {
@@ -96,16 +106,12 @@ class MainActivity : ComponentActivity() {
                         }
 
                         entry<Accounts> {
-                            LoginScreen(onLogin = {
-                                // cannot go back, pops to content
-                                backStack.clear()
-                                backStack.add(Content)
-                            })
+                            LoginScreen(backStack)
                         }
 
-                        /* entry<Login> {
-                            // inside LoginScreen
-                        } */
+                        entry<Login> {
+                            LoginView(backStack)
+                        }
                     }
                 )
             }

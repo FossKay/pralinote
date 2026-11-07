@@ -18,7 +18,6 @@ import kotlin.time.Duration.Companion.milliseconds
 
 data class LoginState(
     val profiles: List<Credentials> = emptyList(),
-    val showForm: Boolean = false,
     val editingId: Long? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -51,7 +50,7 @@ class LoginModel(
         viewModelScope.launch {
             try {
                 val client = if (MOCK) {
-                    delay(3000.milliseconds)
+                    delay(5000.milliseconds)
                     PronoteClient.mock()
                 } else {
                     PronoteClient.login(
@@ -101,14 +100,7 @@ class LoginModel(
                     }
                 }
 
-                _state.update {
-                    it.copy(
-                        profiles = store.getAll(), showForm = false, editingId = null
-                    )
-                }
-
                 onLoginSuccess(params.collectivity.color)
-
             } catch (e: Exception) {
                 if (profileId != null) {
                     store.get(profileId)?.let {
@@ -142,7 +134,7 @@ class LoginModel(
     fun newProfile() {
         _state.update {
             it.copy(
-                showForm = true, editingId = null, error = null
+                editingId = null, error = null
             )
         }
     }
@@ -150,7 +142,7 @@ class LoginModel(
     fun openProfile(profile: Credentials, onLoginSuccess: (String?) -> Unit) {
         _state.update {
             it.copy(
-                showForm = true, editingId = profile.id, error = if (profile.dirty) {
+                editingId = profile.id, error = if (profile.dirty) {
                     "La connexion à Pronote a expiré."
                 } else {
                     null
@@ -171,7 +163,7 @@ class LoginModel(
     fun cancel() {
         _state.update {
             it.copy(
-                showForm = false, editingId = null, error = null
+                editingId = null, error = null
             )
         }
     }
