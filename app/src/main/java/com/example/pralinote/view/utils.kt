@@ -86,6 +86,7 @@ fun formatSubject(subject: String): String {
                 .replace("- ", "")
                 .replace("& ", " & ")
                 .split("/ ").last()
+                .replace("  ", " ") // oops
                 .replaceFirstChar { it.uppercase() }
         }
 }

@@ -255,7 +255,8 @@ fun HomeTimetableView(
 
         val firstDate = getDate(home.events.first().start.split(" ").first())
         val lastDate = getDate(home.events.last().start.split(" ").first())
-        val fetchAgenda = date !in firstDate..lastDate
+        // kotlin: not LENGTH but SIZE...
+        val fetchAgenda = home.events.size == 10 && date !in firstDate..lastDate
 
         if (fetchAgenda && agendaState.agenda == null && agendaState.error == null && !agendaState.isLoading) {
             agendaViewModel.loadAgenda()

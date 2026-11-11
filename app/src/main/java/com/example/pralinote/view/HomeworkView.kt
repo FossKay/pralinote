@@ -39,6 +39,8 @@ import com.example.pralinote.model.HomeModel
 import com.example.pralinote.model.HomeworkDoneModel
 import com.example.pralinote.model.HomeworkModel
 import uniffi.pronote_rs.Homework
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Composable
 fun Homework(
@@ -140,6 +142,13 @@ fun HomeHomeworkView(
         homeState.error != null -> ErrorView(homeState.error!!)
         homeState.home != null -> {
             val homeworkList = homeState.home!!.homework + (homeworkState.homework ?: emptyList())
+
+            if (LocalDateTime.now().hour >= 12) {
+                val today = dateToString(LocalDate.now())
+                // apparently, the fact that filter modifies homeworkList
+                // doesn't mean it should be var...
+                homeworkList.filter { it.dueDate != today }
+            }
 
             LazyColumn(
                 modifier = Modifier.padding(paddingValues),
