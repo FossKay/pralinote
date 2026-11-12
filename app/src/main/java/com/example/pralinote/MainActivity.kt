@@ -7,7 +7,6 @@ import android.util.Base64
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -80,7 +79,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val themeModel: ThemeModel = viewModel()
-            // val loginModel: LoginModel = viewModel()
             val themeState by themeModel.state.collectAsStateWithLifecycle()
             val backStack = rememberNavBackStack(Accounts)
 

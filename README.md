@@ -20,14 +20,13 @@ Differences with the official mobile app and Papillon:
 
 ## Features
 
-- Multiple accounts, password login
+- Multiple accounts, password login, auto-login
 - Homework (click on it to mark it as done/undone)
 - Timetable with agenda integration
 - Grades
 
 Coming soon:
 - QR code login
-- Autoconnect
 - Grade average, plots
 - News
 

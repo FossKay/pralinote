@@ -23,13 +23,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.NoAccounts
+import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -44,6 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +82,13 @@ fun LoginScreen(
     loginModel: LoginModel = viewModel(),
 ) {
     val loginState by loginModel.state.collectAsStateWithLifecycle()
+
+    val autoProfile = loginState.profiles.firstOrNull {
+        loginState.isAutoLogin && it.autoconnect
+    }
+    if (autoProfile == null && loginState.isAutoLogin) {
+        loginModel.noAutoLogin()
+    }
 
     Scaffold(topBar = {
         TopAppBar(
@@ -117,7 +128,13 @@ fun LoginScreen(
                         PralinoteTheme(
                             color = getPraliColor(profile.color)
                         ) {
-                            Profile(profile, onConnect = {
+                            val isAuto = profile.id == autoProfile?.id
+                            if (isAuto) {
+                                themeModel.setColor(profile.color)
+                            }
+                            Profile(loginState.isAutoLogin, isAuto, profile, onConnect = {
+                                // otherwise logout -> login back immediately
+                                loginModel.noAutoLogin()
                                 loginModel.openProfile(profile) {
                                     themeModel.setColor(it)
                                     loginModel.cancel()
@@ -128,6 +145,8 @@ fun LoginScreen(
                                 backStack.add(Login)
                             }, onDelete = {
                                 loginModel.deleteProfile(profile.id)
+                            }, onToggle = {
+                                loginModel.toggleAuto(profile)
                             })
                         }
                     }
@@ -156,6 +175,9 @@ fun LoginView(
     }
     var pass by rememberSaveable(state.editingId) {
         mutableStateOf(profile?.password ?: "")
+    }
+    var autoconnect by rememberSaveable(state.editingId) {
+        mutableStateOf(profile?.autoconnect ?: state.profiles.isEmpty())
     }
 
     var showPassword by remember { mutableStateOf(false) }
@@ -263,6 +285,23 @@ fun LoginView(
                     },
                 )
                 Spacer(Modifier.height(16.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = autoconnect,
+                        onCheckedChange = { autoconnect = it },
+                        enabled = !isLoading
+                    )
+                    Text(
+                        "Se connecter automatiquement",
+                        // https://developer.android.com/develop/ui/compose/designsystems/material2-material3
+                        color = if (isLoading)
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Spacer(Modifier.height(16.dp))
 
                 error?.let {
                     Text(
@@ -274,7 +313,7 @@ fun LoginView(
                 Button(
                     onClick = {
                         loginModel.doLogin(
-                            url, user, pass, state.editingId
+                            url, user, pass, autoconnect, state.editingId
                         ) {
                             themeModel.setColor(it)
                             loginModel.cancel()
@@ -307,8 +346,7 @@ fun LoginView(
                                 onClick = { showUrlHelp = false }) {
                                 Text("Fermer")
                             }
-                        }
-                    )
+                        })
                 }
             }
         }
@@ -316,8 +354,22 @@ fun LoginView(
 }
 
 @Composable
-fun Profile(profile: Credentials, onConnect: () -> Unit, onDelete: () -> Unit) {
+fun Profile(
+    isAutoLogin: Boolean, // is it autoconnecting
+    isAuto: Boolean, // is it the target profile
+    profile: Credentials,
+    onConnect: () -> Unit,
+    onDelete: () -> Unit,
+    onToggle: () -> Unit,
+) {
     var dropdownOpen by remember { mutableStateOf(false) }
+
+    // avoid blocking main thread I guess
+    LaunchedEffect(isAuto) {
+        if (isAuto) {
+            onConnect()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -357,7 +409,7 @@ fun Profile(profile: Credentials, onConnect: () -> Unit, onDelete: () -> Unit) {
             Column(
                 modifier = Modifier
                     .weight(1f) // so that the options icon is at top right
-                    .clickable { onConnect() }
+                .clickable { if (!isAutoLogin) onConnect() }
                     .padding(start = 16.dp)
                     .padding(vertical = 16.dp)) {
                 Text(
@@ -379,7 +431,7 @@ fun Profile(profile: Credentials, onConnect: () -> Unit, onDelete: () -> Unit) {
                 IconButton(
                     onClick = { dropdownOpen = true }) {
                     Icon(
-                        imageVector = Icons.Default.MoreVert, contentDescription = "Options"
+                        imageVector = Icons.Outlined.MoreVert, contentDescription = "Options"
                     )
                 }
 
@@ -389,10 +441,22 @@ fun Profile(profile: Credentials, onConnect: () -> Unit, onDelete: () -> Unit) {
                     }) {
                     DropdownMenuItem(text = { Text("Supprimer") }, leadingIcon = {
                         Icon(
-                            Icons.Default.Delete, contentDescription = null
+                            Icons.Outlined.Delete, contentDescription = null
                         )
                     }, onClick = {
                         onDelete()
+                    })
+                    DropdownMenuItem(text = {
+                        Text(
+                            if (profile.autoconnect) "Désactiver la connexion auto" else "Activer la connexion auto"
+                        )
+                    }, leadingIcon = {
+                        Icon(
+                            if (profile.autoconnect) Icons.Outlined.NoAccounts else Icons.Outlined.PersonAdd,
+                            contentDescription = null
+                        )
+                    }, onClick = {
+                        onToggle()
                     })
                 }
             }

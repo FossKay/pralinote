@@ -18,6 +18,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 data class LoginState(
     val profiles: List<Credentials> = emptyList(),
+    val isAutoLogin: Boolean = true,
     val editingId: Long? = null,
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -38,6 +39,7 @@ class LoginModel(
         rootUrl: String,
         user: String,
         pwd: String,
+        autoconnect: Boolean,
         profileId: Long?,
         onLoginSuccess: (String?) -> Unit
     ) {
@@ -78,25 +80,33 @@ class LoginModel(
                             color = params.collectivity.color,
                             isToken = false,
                             dirty = false,
-                            autoconnect = false
+                            autoconnect = autoconnect
                         )
                     )
                 } else {
-                    store.get(profileId)?.let { profile ->
-                        store.save(
-                            profile.copy(
-                                rootUrl = rootUrl.trim(),
-                                username = user.trim(),
-                                password = pwd.trim(),
-                                navIdentifier = null,
-                                uuid = null,
-                                schoolName = params.schoolName,
-                                studentName = userParams.student.person.name,
-                                color = params.collectivity.color,
-                                isToken = false,
-                                dirty = false
-                            )
+                    val profile = store.get(profileId)!!
+                    store.save(
+                        profile.copy(
+                            rootUrl = rootUrl.trim(),
+                            username = user.trim(),
+                            password = pwd.trim(),
+                            navIdentifier = null,
+                            uuid = null,
+                            schoolName = params.schoolName,
+                            studentName = userParams.student.person.name,
+                            color = params.collectivity.color,
+                            isToken = false,
+                            dirty = false,
+                            autoconnect = autoconnect
                         )
+                    )
+                    if (autoconnect) {
+                        // cannot be two autoconnect at the same time
+                        store.getAll().forEach {
+                            if (profileId != it.id && it.autoconnect) {
+                                store.save(it.copy(autoconnect = false))
+                            }
+                        }
                     }
                 }
 
@@ -121,6 +131,19 @@ class LoginModel(
                     it.copy(isLoading = false)
                 }
             }
+        }
+    }
+
+    fun noAutoLogin() {
+        _state.update {
+            it.copy(isAutoLogin = false)
+        }
+    }
+
+    fun toggleAuto(profile: Credentials) {
+        store.save(profile.copy(autoconnect = !profile.autoconnect))
+        _state.update {
+            it.copy(profiles = store.getAll())
         }
     }
 
@@ -154,9 +177,12 @@ class LoginModel(
                 profile.rootUrl,
                 profile.username,
                 profile.password,
+                profile.autoconnect,
                 profile.id,
                 onLoginSuccess
             )
+        } else {
+            store.save(profile.copy(autoconnect = false))
         }
     }
 

@@ -18,14 +18,13 @@ Les différences par rapport à l'appli officielle et Papillon:
 
 ## Fonctionnalités
 
-- Plusieurs comptes, connexion avec un mot de passe
+- Plusieurs comptes, connexion avec un mot de passe et auto-connexion
 - Devoirs (cliquez dessus pour marquer un devoir comme fait/non fait)
 - Emploi du temps avec agenda intégré
 - Notes
 
 Arrive bientôt:
 - Connexion avec un QR code
-- Connexion automatique
 - Moyenne des notes et graphiques
 - Actualités et sondages
 
