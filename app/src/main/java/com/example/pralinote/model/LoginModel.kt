@@ -52,7 +52,7 @@ class LoginModel(
         viewModelScope.launch {
             try {
                 val client = if (MOCK) {
-                    delay(5000.milliseconds)
+                    // delay(5000.milliseconds)
                     PronoteClient.mock()
                 } else {
                     PronoteClient.login(

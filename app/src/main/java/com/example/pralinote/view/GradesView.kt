@@ -43,6 +43,7 @@ import com.example.pralinote.model.GradesModel
 import com.example.pralinote.model.HomeModel
 import uniffi.pronote_rs.Grade
 import uniffi.pronote_rs.GradeValue
+import uniffi.pronote_rs.Grades
 import uniffi.pronote_rs.Period
 
 @Composable
@@ -91,8 +92,7 @@ fun GradesView(
                     !showHome && fullGrades == null -> LoadingView()
                     else -> {
                         GradesList(
-                            selectedNull = selected == null,
-                            grades = fullGrades?.grades ?: emptyList(),
+                            grades = fullGrades,
                             homeGrades = if (showHome) {
                                 homeGrades.grades
                             } else {
@@ -163,14 +163,22 @@ fun PeriodPicker(periods: List<Period>, selected: String?, onSelect: (String) ->
 }
 
 @Composable
-fun GradesList(selectedNull: Boolean, grades: List<Grade>, homeGrades: List<Grade>, footer: @Composable () -> Unit = {}) {
+fun GradesList(
+    grades: Grades?,
+    homeGrades: List<Grade>,
+    footer: @Composable () -> Unit = {}
+) {
     LazyColumn(
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
-        if ((grades + homeGrades).isEmpty()) {
+        val fullGrades = grades?.grades ?: emptyList()
+
+        if ((fullGrades + homeGrades).isEmpty()) {
             item {
                 Text(
-                    if (selectedNull) "Pas de notes récentes" else { "Pas de notes" },
+                    if (grades == null) "Pas de notes récentes" else {
+                        "Pas de notes"
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
@@ -181,9 +189,9 @@ fun GradesList(selectedNull: Boolean, grades: List<Grade>, homeGrades: List<Grad
         }
 
         if (homeGrades.isNotEmpty()) {
-            if (grades.isNotEmpty()) {
+            if (fullGrades.isNotEmpty()) {
                 val newHome = homeGrades.map {
-                    grades.firstOrNull { grade ->
+                    fullGrades.firstOrNull { grade ->
                         grade.id == it.id
                     } ?: it
                 }
@@ -195,20 +203,20 @@ fun GradesList(selectedNull: Boolean, grades: List<Grade>, homeGrades: List<Grad
                     GradeView(it)
                 }
             }
-        } else if (grades.isNotEmpty()) {
-            items(grades.reversed()) {
+        } else if (fullGrades.isNotEmpty()) {
+            items(fullGrades.reversed()) {
                 GradeView(it)
             }
         }
 
         item { footer() }
 
-        if (homeGrades.isNotEmpty() && grades.isNotEmpty()) {
-            val newFull = grades.filter {
+        if (homeGrades.isNotEmpty() && fullGrades.isNotEmpty()) {
+            val newFull = fullGrades.filter {
                 // could also .all(... != ...)
-                !homeGrades.any({ homeGrade ->
+                !homeGrades.any { homeGrade ->
                     homeGrade.id == it.id
-                })
+                }
             }
 
             item {
@@ -283,6 +291,12 @@ fun GradeView(grade: Grade) {
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }
+                    if (grade.average != GradeValue.Empty) {
+                        Text(
+                            "Moyenne: ${gradeToText(grade.average)}",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
                     grade.solution?.let {
                         AttachmentView(grade.solution!!)
                     }
@@ -296,6 +310,13 @@ fun GradeView(grade: Grade) {
                     if (grade.grade is GradeValue.Value && grade.scale != grade.defaultScale) {
                         Text(
                             "/${grade.scale}",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                    }
+                    if (grade.weight != null) {
+                        Text(
+                            " (x${prettyFloat(grade.weight!!)})",
+                            //fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.bodyMedium,
                         )
                     }

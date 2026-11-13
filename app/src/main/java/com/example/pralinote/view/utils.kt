@@ -48,8 +48,13 @@ fun getPrettyTime(time: String): String {
     return time.split(" ")[1].split(":").take(2).joinToString("h").removeSuffix("00")
 }
 
+fun prettyFloat(f: Float): String {
+    return f.toString().removeSuffix(".0").replace(".", ",")
+}
+
 fun gradeToText(grade: GradeValue): String = when (grade) {
-    is GradeValue.Value -> grade.v1.toString().removeSuffix(".0").replace(".", ",")
+    // v1 = value 1 of enum
+    is GradeValue.Value -> prettyFloat(grade.v1)
     GradeValue.Absent -> "Absent"
     GradeValue.Excused -> "Excusé"
     GradeValue.NotGraded -> "Pas noté"

@@ -135,6 +135,7 @@ fun LoginScreen(
                             Profile(loginState.isAutoLogin, isAuto, profile, onConnect = {
                                 // otherwise logout -> login back immediately
                                 loginModel.noAutoLogin()
+                                backStack.add(Login)
                                 loginModel.openProfile(profile) {
                                     themeModel.setColor(it)
                                     loginModel.cancel()
@@ -142,7 +143,6 @@ fun LoginScreen(
                                     backStack.add(Accounts)
                                     backStack.add(Content)
                                 }
-                                backStack.add(Login)
                             }, onDelete = {
                                 loginModel.deleteProfile(profile.id)
                             }, onToggle = {
